@@ -375,3 +375,7 @@ class TradeLoopBack(object):
 trade_loop_back = TradeLoopBack(trade_days, TradeStrategy1())
 trade_loop_back.execute_trade()
 print('回测策略1总盈亏为：{}%'.format(reduce(lambda a, b : a+b, trade_loop_back.profit_array) * 100))
+
+import numpy as np
+import matplotlib.pyplot as plt
+plt.plot(np.array(trade_loop_back.profit_array).cumsum())
