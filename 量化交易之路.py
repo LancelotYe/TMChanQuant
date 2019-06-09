@@ -379,3 +379,83 @@ print('回测策略1总盈亏为：{}%'.format(reduce(lambda a, b : a+b, trade_l
 import numpy as np
 import matplotlib.pyplot as plt
 plt.plot(np.array(trade_loop_back.profit_array).cumsum())
+
+
+################################################################################################
+# 静态方法、类方法与属性
+# 1.属性
+# TradeStrategy1 类中的slef.__buy_change_threshold被定义为私有变量，外部不能直接赋值，使用了@property来赋值，代码如下
+'''
+    @property
+    def buy_change_threshold(self):
+        # getter 函数
+        return self.__buy_change_threshold
+    @buy_change_threshold.setter
+    def buy_change_threshold(self, buy_change_threshold):
+        if not isinstance(buy_change_threshold, float):
+            raise TypeError('buy_chnage_threshold must be float!')
+        self.__buy_change_threshold = round(buy_change_threshold, 2)
+'''
+# 第一个@property方法是一个getter函数，它使得buy_change_threshold成为一个属性，
+# @buy_change_threshold.setter属性添加了setter函数，这样外部的访问和设置形式如下。
+# 访问：
+trade_strategy1 = TradeStrategy1()
+trade_strategy1.buy_change_threshold
+# 设置
+trade_strategy1.buy_change_threshold = 0.08
+trade_strategy1.buy_change_threshold
+
+# 使用@property的目的是给实力增加除访问与修改之外的其他处理逻辑，比如buy_change_threshold.setter做了类型检查和将float阀值保留两位小数操作，不要写没有做任何其他额外操作的property。
+trade_strategy1 = TradeStrategy1()
+trade_strategy1.buy_change_threshold = 0.1
+trade_loop_back = TradeLoopBack(trade_days, trade_strategy1)
+trade_loop_back.execute_trade()
+print('回测策略1总盈亏为：{}%'.format(reduce(lambda a , b : a + b, trade_loop_back.profit_array)) * 100)
+plt.plot(np.array(trade_loop_back.profit_array).cumsum())
+
+
+################################################################################################
+# 继续编写一个均值回复交易策略，当股价连续两个交易日下跌，且下跌幅度超过一个阀值（默认-10%）时，买入股票并持有s_keep_stock_threshold(10天)，代码如下
+class TradeStrategy2(TradeStrategyBase):
+    '''
+    交易策略2：均值回复策略，当股价连续两个交易日下跌，且下跌幅度超过阀值默认s_buy_change_threshold(-10%),
+    买入股票并持有s_keep_stock_threshold(10天)
+    '''
+    # 买入后持有天数
+    s_keep_stock_threshold=10
+    # 下跌买入阀值
+    s_buy_change_threshold = -0.10
+    def __init__(self):
+        self.keep_stock_day = 0
+    def buy_strategy(self, trade_ind, trade_day, trade_days):
+        if self.keep_stock_day == 0 and trade_ind >= 1:
+            '''当没有持有股票的时候self.keep_stock_day == 0 并且trade_ind>=1,不是所有交易开始的第一天，因为需要yesterday数据'''
+            #trade_day.change < 0 bool:今天股价是否下跌
+            today_down = trade_day.change < 0
+            #昨天股价是否下跌
+            yesterday_down = trade_days[trade_ind - 1].change < 0
+            # 两天总跌幅
+            down_rate = trade_day.change + trade_days[trade_ind - 1].change
+            if today_down and yesterday_down and down_rate < TradeStrategy2.s_buy_change_threshold:
+                # 买入条件成立：连跌两天，跌幅超过s_buy_change_threshold
+                self.keep_stock_day += 1
+        elif self.keep_stock_day > 0:
+            self.keep_stock_day += 1
+    def sell_strategy(self, trade_ind, trade_day, trade_days):
+        if self.keep_stock_day >= TradeStrategy2.s_keep_stock_threshold:
+            self.keep_stock_day = 0
+    @classmethod
+    def set_keep_stock_threshold(cls, keep_stock_threshold):
+        cls.s_keep_stock_threshold = keep_stock_threshold
+    @staticmethod
+    def set_buy_chnage_threshold(buy_change_threshold):
+        TradeStrategy2.s_buy_change_threshold = buy_change_threshold
+
+trade_strategy2 = TradeStrategy2()
+trade_loop_back = TradeLoopBack(trade_days, trade_strategy2)
+trade_loop_back.execute_trade()
+print('回测策略2总盈亏为：{}%'.format(
+    reduce(lambda a, b : a + b , trade_loop_back.profit_array)*100
+))
+
+plt.plot(np.array(trade_loop_back.profit_array).cumsum())

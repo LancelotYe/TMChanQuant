@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="62e28bab-170d-485f-814c-257190e8e75a" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/量化交易之路.py" beforeDir="false" afterPath="$PROJECT_DIR$/量化交易之路.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,7 +20,7 @@
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="558">
-              <caret line="379" column="7" selection-start-line="379" selection-start-column="7" selection-end-line="379" selection-end-column="7" />
+              <caret line="457" column="66" selection-start-line="457" selection-start-column="66" selection-end-line="457" selection-end-column="66" />
             </state>
           </provider>
         </entry>
@@ -209,7 +210,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3290993" />
       <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.29175705" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info anchor="bottom" id="Python Console" order="10" weight="0.26760563" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.26681128" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32968238" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -334,7 +335,7 @@
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="558">
-          <caret line="379" column="7" selection-start-line="379" selection-start-column="7" selection-end-line="379" selection-end-column="7" />
+          <caret line="457" column="66" selection-start-line="457" selection-start-column="66" selection-end-line="457" selection-end-column="66" />
         </state>
       </provider>
     </entry>
