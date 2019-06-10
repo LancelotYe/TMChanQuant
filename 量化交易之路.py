@@ -625,3 +625,35 @@ sorted(result)[::-1][:10]
 # TradeStrategy2.set_buy_change_threshold(buy_change_threshold)
 # 这两个设置参数的方法都是类方法，非实例方法。在同一进程中的多个线程不断针对类变量设置参数，结果是错误的，并无我们预想的结果。
 
+# 2.4.3使用编译库提高性能
+# 前面使用了多进程和多线程并行处理任务的技术，来提升Python代码的运行效率，除此之外，还有一些很棒的开源库可以提高性能比如：
+# Numexpr可以快速计算数值，缺点是局限性大
+# numba运行时动态编译Python代码来提高效率
+# Cython静态编译Python代码来提高效率
+
+# 买入后持股天数,放大寻找范围1~503天,间隔1天
+keep_stock_list = list(range(1, 504, 1))
+# 下跌买入阀值寻找范围 -0.01 ! -0.99 共99个
+buy_change_list = [buy_change/100.0 for buy_change in range(-1, -100, -1)]
+def do_single_task():
+    task_list = list(itertools.product(keep_stock_list, buy_change_list))
+    # print('笛卡儿积参数集合总共结果为:{}个'.format(len(task_list)))
+    for keep_stock_threshold, buy_change_threshold in task_list:
+        calc(keep_stock_threshold, buy_change_threshold)
+# %time ipython magic code 详细查阅附录中关于Ipython的使用
+%time do_single_task()
+
+# numba动态编译可提高效率.下面可以看到只用一行代码nb.jit()来静态编译原始函数,之后调用编译好的do_singletask_nb()函数
+
+import numba as nb
+do_single_task_nb = nb.jit(do_single_task)
+%time do_single_task_nb()
+
+# 写代码要注意效率
+for s in keep_stock_list+buy_change_list:
+    print(s)
+
+for s in itertools.chain(keep_stock_list, buy_change_list):
+    print(s)
+
+# 第一种方案会创建一个全新的序列,而itertools.chain()函数不会创建新的序列,所以如果输入序列非常大时会很节省内存,提升运行效率

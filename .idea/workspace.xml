@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="62e28bab-170d-485f-814c-257190e8e75a" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/量化交易之路.py" beforeDir="false" afterPath="$PROJECT_DIR$/量化交易之路.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,8 +21,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="551">
-              <caret line="599" column="25" lean-forward="true" selection-start-line="599" selection-start-column="25" selection-end-line="599" selection-end-column="25" />
+            <state relative-caret-position="300">
+              <caret line="639" column="4" selection-start-line="639" selection-start-column="4" selection-end-line="639" selection-end-column="4" />
             </state>
           </provider>
         </entry>
@@ -202,8 +201,8 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49445984" visible="true" weight="0.15226555" />
-      <window_info id="Structure" order="1" sideWeight="0.5055402" side_tool="true" visible="true" weight="0.15226555" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49407783" visible="true" weight="0.15226555" />
+      <window_info id="Structure" order="1" sideWeight="0.50592214" side_tool="true" visible="true" weight="0.15226555" />
       <window_info id="Favorites" order="2" sideWeight="0.50147927" side_tool="true" weight="0.15226555" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -215,7 +214,7 @@
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3286334" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.29175705" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.21691974" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.35900217" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32968238" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -349,8 +348,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="599" column="25" lean-forward="true" selection-start-line="599" selection-start-column="25" selection-end-line="599" selection-end-column="25" />
+        <state relative-caret-position="300">
+          <caret line="639" column="4" selection-start-line="639" selection-start-column="4" selection-end-line="639" selection-end-column="4" />
         </state>
       </provider>
     </entry>
