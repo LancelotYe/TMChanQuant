@@ -448,7 +448,7 @@ class TradeStrategy2(TradeStrategyBase):
     def set_keep_stock_threshold(cls, keep_stock_threshold):
         cls.s_keep_stock_threshold = keep_stock_threshold
     @staticmethod
-    def set_buy_chnage_threshold(buy_change_threshold):
+    def set_buy_change_threshold(buy_change_threshold):
         TradeStrategy2.s_buy_change_threshold = buy_change_threshold
 
 trade_strategy2 = TradeStrategy2()
@@ -459,3 +459,169 @@ print('回测策略2总盈亏为：{}%'.format(
 ))
 
 plt.plot(np.array(trade_loop_back.profit_array).cumsum())
+
+
+
+
+
+
+
+
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+################day3##################################day3##################################day3##################################day3##################
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+
+
+# 静态方法类方法
+# python中通过装饰器@classmethod与@staticmethod来表明方法为类方法和静态方法，通过类名.方法名()的形式调用：
+# @staticmethod不需要任何参数。
+# @classmethod不需要self参数，但第一个参数需要是表示自身的cls参数
+# s_keep_stock_threshold与s_buy_change_threshold在TradeStrategy2中定义的方式都为类全局变量。
+# @staticmethod方法中如果要使用带这个类中的变量，只能使用类名.属性名或者类名.方法名
+# 代码如下:
+# @staticmethod
+# def set_buy_change_threshold(buy_change_threshold):
+#     TradeStrategy2.s_buy_change_threshold = buy_change_threshold
+# # @classmethod方法函数声明中持有cls参数们可以通过cls来访问类变量,如下面cls.s_keep_stock_threshold的使用,所以它的优点是避免硬编码.
+# @classmethod
+# def set_keep_stock_threshold(cls, keep_stock_threshold):
+#     cls.s_keep_stock_threshold = keep_stock_threshold
+# # 一下代码实现通过类方法和静态方法修改策略参数
+# trade_strategy2 = TradeStrategy2()
+# TradeStrategy2.set_buy_chnage_threshold(-0.08)
+# TradeStrategy2.set_keep_stock_threshold(20)
+
+################################################################################################
+# 2.4.1
+# 性能与效率
+# itertools的使用
+# 标准库中itertools提供了很多生成循环器的工具,其中很重要的用途是生成集合所有可能方式的元素排列或组合.在量化数据处理中经常需要使用itertools来完成数据的各种排列组合以寻找最优参数
+
+import itertools
+# (1)permutations()函数,考虑顺序组合元素,示例如下
+items = [1,2,3]
+for item in itertools.permutations(items):
+    print(item)
+
+# (2)combinations()函数,不考虑顺序,不放回数据
+for item in itertools.combinations(items, 2):
+    print(item)
+# (3)combinations_with_replacrment()函数,不考虑顺序,有放回数据
+for item in itertools.combinations_with_replacement(items, 2):
+    print(item)
+
+# (4)product函数,笛卡儿积.针对多个输入顺序进行排列组合,示例如下:
+ab = ['a','b']
+cd = ['c','d']
+# 针对ab,cd两个集合进行排列组合
+for item in itertools.product(ab, cd):
+    print(item)
+
+# 在量化中通过参数组合来寻找最优参数时一般都会使用笛卡儿积,本节将重点示列
+# 下面继续刚才的回测实列,使用itertools.product(笛卡儿积)求出TradeStrategy2的最优参数,即求出下跌幅度买入阀值(s_buy_change_threshold)与买入股票后持有天数(s_keep_stock_threshold)如何取值,可以让策略最终盈利最大化.
+# 首先将2.3节修改TradeStrategy2策略基础参数并执行回测的代码抽象出一个函数calc(),该函数的输入参数有两个,分别是持有天数和下跌买入阀值;输出返回值为3个,分别是盈亏情况,输入的持股天数和下跌买入阀值
+
+def calc(keep_stock_threshold, buy_change_threshold):
+    '''
+    :param keep_stock_threshold:持股天数
+    :param buy_change_threshold:下跌买入阀值
+    :return:盈亏情况,输入的持股天数,输入的下跌买入阀值
+    '''
+    trade_strategy2 = TradeStrategy2()
+    TradeStrategy2.set_keep_stock_threshold(keep_stock_threshold)
+    TradeStrategy2.set_buy_change_threshold(buy_change_threshold)
+    # 进行回测
+    trade_loop_back = TradeLoopBack(trade_days, trade_strategy2)
+    trade_loop_back.execute_trade()
+    # 计算回测结果的最终盈亏值profit
+    profit = 0.0 if len(trade_loop_back.profit_array) == 0 else reduce(lambda a, b : a + b, trade_loop_back.profit_array)
+    # 返回值profit和函数的两个输入参数
+    return profit, keep_stock_threshold, buy_change_threshold
+
+# 测试,使用2.3节使用的参数
+calc(20, -0.08)
+
+# 笛卡儿积求最优属于有限参数范围内求最优的问题，即将有限个参数形成集合，多个有限集合进行笛卡儿积，寻找问题的最优参数。下面通过range（）函数使具体参数形成有限集合
+# 示例如下
+# range集合：买入后持股天数从2~30天，间隔两天
+keep_stock_list = list(range(2, 30, 2))
+print('持股天数参数组：{}'.format(keep_stock_list))
+# 下跌买入阀值从-0.05到-0.15，即从5%下跌到15%
+buy_change_list = [buy_change / 100.0 for buy_change in range(-5, - 16, -1)]
+print('下跌阀值参数组：{}'.format(buy_change_list))
+
+# 通过对多个有限集合进行笛卡儿积，使用上面封装的函数calc()分别将各个组合参数代入，计算参数对应的最终盈利结果，将结果加入result序列
+result = []
+for keep_stock_threshold, buy_change_threshold in itertools.product(keep_stock_list, buy_change_list):
+    # 使用calc（）函数计算参数对应的最终盈利，结果加入result序列
+    result.append(calc(keep_stock_threshold, buy_change_threshold))
+print('笛卡儿积参数集合总共结果为:{}个'.format(len(result)))
+
+# 下面使用sorted(result)将结果序列排序
+# [::1]将整个排序结果反转，反转后盈亏收益从最高向低开始排序
+# [:10]取出收益最高的前十个组合查看
+sorted(result)[::-1][:10]
+
+
+################################################################################################
+# 2.4.2多进程 vs 多线程
+# 真实运算中计算非常复杂，面对这个问题，一般使用多任务并行的方式来解决：
+'''
+启动多个进程
+启动多个线程
+启动多个进程，每个进程启动多个线程
+'''
+# 使用哪种方式最好？
+# 由于全局解释锁GIL，Python的线程被限制为同一时刻值允许一个线程执行，所以Python的多线程适用于处理I/O密集型任务和并发执行的阻塞操作，多进程处理并行的计算密集型任务
+# 1.使用多进程
+# 下面使用（ProcessPoolExecutor）
+from concurrent.futures import ProcessPoolExecutor
+result = []
+# 回调函数，通过add_done_callback任务完成后调用
+def when_done(r):
+    # when_done在主进程中运行
+    result.append(r.result())
+    '''
+    with class_a() as a:上下文管理器：
+    with作为关键字开头的python中称为上下文管理器，它的特点是：
+    -在进入上下文管理器定义的缩进模块后，会触发A_Class中定义的__enter__()函数；
+    -在结束上下文管理器定义的缩进模块后，会触发A_Class中定义的__exit__()函数。
+    一般在__enter__()和__exit__()函数中定义相反的操作，如文件的打开和关闭，资源的创建和释放等。列如，在线程锁类threading.RLock中可以找到如下实现:
+    def __enter__(self)
+        self.acquire()
+    def __exit__(self, t, v, tb):
+        self.release()
+    通过在__enter__()函数中使用acquire()函数来上锁，通过在__exit__()函数中使用release()函数来解锁
+    '''
+with ProcessPoolExecutor() as pool:
+    for keep_stock_threshold, buy_change_threshold in itertools.product(keep_stock_list, buy_change_list):
+        '''
+            submit提交任务：使用calc()函数和的参数通过submit提交到独立进程提交的任务必须是简单函数，进程并行不支持类方法，闭包等，函数参数和返回值必须兼容pickle序列化，因为进程间的通信需要传递可序列化对象
+        '''
+        future_result = pool.submit(calc, keep_stock_threshold, buy_change_threshold)
+        # 当进程完成任务即calc运行结束后的回调函数
+        future_result.add_done_callback(when_done)
+
+sorted(result)[::-1][:10]
+
+# 2使用多线程ThreadPoolExecutor
+# 使用多线程ThreadPoolExecutor与前面使用多进程的方法几乎一模一样，唯一的区别是使用ThreadPoolExecutor代替ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
+result = []
+def when_done(r):
+    result.append(r.result())
+with ThreadPoolExecutor() as pool:
+    for keep_stock_threshold, buy_change_threshold in itertools.product(keep_stock_list, buy_change_list):
+        future_result = pool.submit(calc, keep_stock_threshold, buy_change_threshold)
+        future_result.add_done_callback(when_done)
+sorted(result)[::-1][:10]
+
+# 仔细观察上面 多线程运行的输出结果可以发现，与串行的结果和多进程的结果不一致。原因在calc()函数中：
+# TradeStrategy2.set_keep_stock_threshold(keep_stock_threshold)
+# TradeStrategy2.set_buy_change_threshold(buy_change_threshold)
+# 这两个设置参数的方法都是类方法，非实例方法。在同一进程中的多个线程不断针对类变量设置参数，结果是错误的，并无我们预想的结果。
+
