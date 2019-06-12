@@ -22,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="633">
-              <caret line="673" selection-start-line="673" selection-end-line="673" selection-end-column="31" />
+            <state relative-caret-position="648">
+              <caret line="759" lean-forward="true" selection-start-line="759" selection-end-line="759" />
             </state>
           </provider>
         </entry>
@@ -87,6 +87,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -98,7 +99,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -202,8 +202,8 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49394348" visible="true" weight="0.15226555" />
-      <window_info id="Structure" order="1" sideWeight="0.50605655" side_tool="true" visible="true" weight="0.15226555" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49259758" visible="true" weight="0.15226555" />
+      <window_info id="Structure" order="1" sideWeight="0.5074024" side_tool="true" visible="true" weight="0.15226555" />
       <window_info id="Favorites" order="2" sideWeight="0.50147927" side_tool="true" weight="0.15226555" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -213,7 +213,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3286334" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3286334" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.29067245" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.29035753" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.19414316" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32968238" />
@@ -346,8 +346,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="633">
-          <caret line="673" selection-start-line="673" selection-end-line="673" selection-end-column="31" />
+        <state relative-caret-position="648">
+          <caret line="759" lean-forward="true" selection-start-line="759" selection-end-line="759" />
         </state>
       </provider>
     </entry>
