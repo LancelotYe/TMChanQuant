@@ -782,3 +782,200 @@ stock_day_change[-2:,-5:] = tmp
 
 stock_day_change[0:2,0:5]
 stock_day_change[-2:,-5:]
+
+
+
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+################day6##################################day6##################################day6##################################day6##################
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+
+
+# 3.1.4数据转换与规整
+# 数据进行类型转换的目的，有些时候是为了规整数据，有些时候可以通过类型转化进一步得到有用的信息。以下代码使用astype(int)将涨跌幅转化为int结果，可以更清晰地发现涨跌幅数据两端的极限值
+print(stock_day_change[0:2,0:5])
+stock_day_change[0:2,0:5].astype(int)
+
+# 如果只是想要规整float的数据。如保留两位小数，可使用np.around()函数，示列如下：
+np.around(stock_day_change[0:2,0:5], 2)
+
+# 很多时候需要处理的数据会有缺失，NumPy中nP.nan代表缺失，这里手工使切片中的第一个元素变na,代码如下：
+# 使用copy()函数的目的是不修改原始序列
+tmp_test = stock_day_change[0:2, 0:5].copy()
+# 将第一个元素改成nan
+tmp_test[0][0] = np.nan
+
+# 下面使用np.nan_to_num()函数来用0来填充na，由于pandas中的dropna()和fillna()等方式更适合na处理，这里简单带过，示列如下
+tmp_test = np.nan_to_num(tmp_test)
+tmp_test
+
+
+# 3.1.5逻辑条件进行数据筛选
+# 找出切片内涨幅超过0.5的股票时段，通过输出结果可以看到返回的mask是bool的数组，示例如下：
+mask = stock_day_change[0:2, 0:5] > 0.5
+print(mask)
+
+# mask的使用示例如下：
+tmp_test = stock_day_change[0:2, 0:5].copy()
+# 使用上述的mask数据筛选出符合条件的数组，即筛选mask中对应index值为true的
+tmp_test[mask]
+
+# 上述示例只为讲解过程，实际代码中一般会一行写完。比如下面的需求，找出tmp_test切片中>0.5的元素并且赋值为1，代码如下：
+tmp_test[tmp_test > 0.5] = 1
+tmp_test
+# 针对多重筛选条件，使用|,&完成复合的逻辑筛选，注意需要使用括号将每一个条件括起来，否则会有错
+tmp_test = stock_day_change[-2:,-5:]
+print(tmp_test)
+tmp_test[(tmp_test > 1) | (tmp_test < -1)]
+
+
+# 3.1.6通过序列函数
+# NumPy通过提供序列函数可以高效方便地处理序列：
+# 1np.all()函数
+# 判断stock_day_change[0:2,0:5]中是否全是上涨的
+np.all(stock_day_change[0:2,0:5] > 0)
+
+# 2np.any()函数
+# np.any判断序列中是否有元素为true，即对布尔值序列进行或操作
+np.any(stock_day_change[0:2,0:5] > 0)
+
+# 3maximum()函数与minimum()函数
+# 对两个序列对应的元素两两比较，maximum()结果集取大，相对使用maximum()为取小的结果集
+np.maximum(stock_day_change[0:2,0:5], stock_day_change[-2:,-5:])
+
+# 4np.unique()函数
+change_int = stock_day_change[0:2,0:5].astype(int)
+print(change_int)
+# 数列中数值值唯一且不重复的值组成新的序列
+np.unique(change_int)
+
+# 5np.diff()
+# Diff()执行的操作是前后两个临近数值进行减法运算。默认情况下axis=1, axis代表操作轴向
+#axis=1
+np.diff(stock_day_change[0:2,0:5])
+# 下面同样使用diff()函数作用于相同序列，但axis=0，示列：
+# 唯一区别axis=0 纵向操作
+np.diff(stock_day_change[0:2,0:5], axis=0)
+
+
+# 6np.where函数
+# np.where函数在数据筛选、改造中有非常大的作用。
+# np.where函数的语法句式有点类似Java中的三目运算法，。
+tmp_test = stock_day_change[-2:,-5:]
+print(np.where(tmp_test > 0.5, 1, 0))
+
+print(np.where(tmp_test > 0.5, 1, tmp_test))
+
+# 如果逻辑表达式为复合逻辑条件，则使用np.logical_and()和np.logical_or()函数，下面将序列中的值大于0.5并且小于1,否则赋值为0
+np.where(np.logical_and(tmp_test > 0.5, tmp_test < 1), 1, 0)
+
+# 3.1.7数据本地序列化操作
+# 接下来通过np.save()函数可以轻松地将NumPy序列持久化保存。注意不需要添加后缀,save内部会自动生成.npy文件:
+np.save('./gen/stock_day_change', stock_day_change)
+# 读取只需要简单使用np.load()函数即可,但需要注意参数文件名要加上npy后缀,示例如下:
+stock_day_change = np.load('./gen/stock_day_change.npy')
+stock_day_change.shape
+
+
+# 3.2基础统计概念与函数使用
+# 量化中很多技术手段都是基于统计技术实现的,NumPy给python带来的不仅只是有序列并行化执行思想,更有统计学上很多方法的实现,比如期望np.mean(),方差np.var(),标准差np.std()等.
+# 下面首先尝试以下NumPy中使用统计相关的函数.
+# 用切片把序列切成只保留前4只股票,前4天的涨幅数据
+stock_day_change_four = stock_day_change[:4,:4]
+stock_day_change_four
+
+# 3.2.1基础统计函数的使用
+# 如果想知道stock_day_change的一些统计信息,比如横向地分析出某只股票在4天内统计信息,需要使用参数axis=1,举例如下
+print('四天最大涨幅{}'.format(np.max(stock_day_change_four, axis=1)))
+
+# 同理,下面分别是4天内的最大跌幅,振幅和平均涨跌数据
+print('最大跌幅{}'.format(np.min(stock_day_change_four, axis=1)))
+print('振幅幅度{}'.format(np.std(stock_day_change_four, axis=1)))
+print('平均涨跌{}'.format(np.mean(stock_day_change_four, axis=1)))
+
+# 如果想纵向地统计数据,即针对某一个交易日的4只股票进行统计分析,需要使用参数axis=0
+print('股票在四天内最大涨幅{}'.format(np.max(stock_day_change_four, axis=0)))
+
+# 从上面的输出可以看到,使用np.max()函数只能统计出某个交易日的最大涨幅,但是并不知道是哪一只股票,而使用np.argmax()函数即可以实现统计出哪一只股票在某个交易日的涨幅最大:
+print('最大涨幅股票{}'.format(np.argmax(stock_day_change_four, axis=0)))
+#输出: 最大涨幅股票[3 3 2 1]
+# 意思是第一个交易日涨幅最大的为第4只股票,第二个交易日涨幅最大的为第4只股票,第三个交易日涨幅最大的为第3只股票,第四个工作日涨幅最大的为第2只股票
+
+
+# 3.2.2基础统计概念
+# 期望在概率论和统计学中,期望是试验中每次可能结果的概率乘以其结果的总和,反应一组数据平均取值的大小,用于表示分布中心位置
+# 方差是衡量一组数据离散程度的度量,概率论中方差用于度量数据和其期望之间的离散程度,方差越大没说明数据越离散.
+# 标准差为方差的算术平方根,标准差和变量的计算单位相同,所以比方差清晰.因此,很多时候在在分析时使用更多的是标准差
+
+# 回到股市示例,如果有a,b两个交易者,他们多次交易平均战果都是赚100元,那么他们两人的期望都是100,但是a交易者获利的获利稳定性不好,假设振幅为50,即标准差为50,交易者b获利稳定性比a好,假设振幅为20,即标准差为20,示例:
+# 离散函数
+# loc均值,scale标准差
+a_inverstor = np.random.normal(loc=100, scale=50, size=(100,1))
+b_inverstor = np.random.normal(loc=100, scale=20, size=(100,1))
+# 下面输出计算生成数据的标准差,方差及期望数据.
+
+# a交易者
+print('a交易者期望{0:.2f}元,标准差{1:.2f},方差{2:.2f}'.format(a_inverstor.mean(),a_inverstor.std(),a_inverstor.var()))
+# b交易者
+print('b交易者期望{0:.2f}元,标准差{1:.2f},方差{2:.2f}'.format(b_inverstor.mean(),b_inverstor.std(),b_inverstor.var()))
+
+# 这里只生成100次交易数据,数据越多,月接近初始值
+# 下面由可视化角度看以下a,b两个交易者的获利图
+'''
+-均值获利期望线
+-均值获利期望线 + 获利标准差
+-均值获利期望线 - 获利标准差
+'''
+# 为何标准差可以量化数据的振幅
+# 标准差与方差是独立于期望的另一个对分布的度量,两个分布完全可能有相同的期望,而方差和标准差则不同
+
+a_mean = a_inverstor.mean()
+a_std = a_inverstor.std()
+plt.plot(a_inverstor)
+
+plt.axhline(a_mean + a_std, color='r')
+plt.axhline(a_mean - a_std, color='g')
+
+
+b_mean = b_inverstor.mean()
+b_std = b_inverstor.std()
+plt.plot(b_inverstor)
+
+plt.axhline(b_mean + b_std, color='r')
+plt.axhline(b_mean - b_std, color='g')
+
+
+# 3.3.1正态分布基础概念
+# 正态分布是常用的概率分布.正态分布有被称为高斯分布,因为高斯在1809年使用该分布来预测星体位置,正态曲线呈钟形,两头低,中间高,左右对称,因此又被称为钟形曲线.
+# 正态分布曲线特点:
+# -对于正态分布,数据的标准差越大,数据分布离散程度越大
+# -对于正态分布,数据的期望位于曲线的对称轴中心.
+stock_day_change = np.random.standard_normal((stock_cnt, view_day))
+
+# 随机生成的第一只股票的涨跌数据,画出直方图
+import scipy.stats as scs
+# 均值期望
+stock_mean = stock_day_change[0].mean()
+# 标准差
+stock_std = stock_day_change[0].std()
+
+print('股票0 mean均值期望:{:.3f}'.format(stock_mean))
+print('股票0 std标准差:{:.3f}'.format(stock_std))
+# 绘制股票0的直方图
+# bins柱子的数量
+# density向量归一
+plt.hist(stock_day_change[0], bins=50, density=True)
+# linspace从股票0最小值->最大值生成数据
+# def linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis=0):
+fit_linspace = np.linspace(stock_day_change[0].min(),stock_day_change[0].max(),num=51)
+# 概率密度函数(PDF, probability density function)
+# 由均值,方差来描述曲线,使用scipy.stats.norm.pdf生成拟合曲线
+pdf = scs.norm(stock_mean, stock_std).pdf(fit_linspace)
+plt.plot(fit_linspace, pdf, lw=2, c='r')
+
+# pdf函数在统计学中称为概率密度函数,是指在某个确定的取值点附近的可能性函数,将概率值分配给各个事件,得到事件的概率分布,让事件数值化,上面scs.norm返回pdf数值
+
+# 统计套利中均值回复策略的理论依据为价格将围绕价值上下波动.与之类似,正态分布最大特点即为它的数据会围绕某个期望均值附近上下摆动,摆动幅度为数据的标准差.下面使用正态分布的这个特点做一个简单的量化小策略.
