@@ -22,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="241">
-              <caret line="966" column="11" lean-forward="true" selection-start-line="966" selection-start-column="11" selection-end-line="966" selection-end-column="11" />
+            <state relative-caret-position="419">
+              <caret line="1139" selection-start-line="1139" selection-end-line="1140" selection-end-column="248" />
             </state>
           </provider>
         </entry>
@@ -56,10 +56,13 @@
       <find>buy_strategy</find>
       <find>trade_day</find>
       <find>buy_change_threshold</find>
-      <find>plt</find>
-      <find>stock_day_change</find>
       <find>random</find>
       <find>normed</find>
+      <find>stock_day_change_test</find>
+      <find>stock_day_change</find>
+      <find>import matplotlib.pyplot as plt</find>
+      <find>plt</find>
+      <find>stock_ind</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -204,10 +207,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4911032" visible="true" weight="0.15226555" />
-      <window_info id="Structure" order="1" sideWeight="0.50889677" side_tool="true" visible="true" weight="0.15226555" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4909091" visible="true" weight="0.15226555" />
+      <window_info id="Structure" order="1" sideWeight="0.5090909" side_tool="true" visible="true" weight="0.15226555" />
       <window_info id="Favorites" order="2" sideWeight="0.50147927" side_tool="true" weight="0.15226555" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -217,9 +219,9 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3286334" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3286334" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.0889371" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.19956616" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.39045554" />
+      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.3438178" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32968238" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -314,16 +316,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_import_hook.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="52">
-          <caret line="20" selection-start-line="20" selection-end-line="20" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/sandbox/nonparametric/kernels.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="400">
@@ -353,9 +345,6 @@
         <state relative-caret-position="-1407" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/review/量化交易之路.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/numpy/core/function_base.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="178">
@@ -370,10 +359,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/review/量化交易之路.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_import_hook.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" selection-start-line="20" selection-end-line="20" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="966" column="11" lean-forward="true" selection-start-line="966" selection-start-column="11" selection-end-line="966" selection-end-column="11" />
+        <state relative-caret-position="419">
+          <caret line="1139" selection-start-line="1139" selection-end-line="1140" selection-end-column="248" />
         </state>
       </provider>
     </entry>

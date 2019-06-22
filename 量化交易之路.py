@@ -979,3 +979,166 @@ plt.plot(fit_linspace, pdf, lw=2, c='r')
 # pdf函数在统计学中称为概率密度函数,是指在某个确定的取值点附近的可能性函数,将概率值分配给各个事件,得到事件的概率分布,让事件数值化,上面scs.norm返回pdf数值
 
 # 统计套利中均值回复策略的理论依据为价格将围绕价值上下波动.与之类似,正态分布最大特点即为它的数据会围绕某个期望均值附近上下摆动,摆动幅度为数据的标准差.下面使用正态分布的这个特点做一个简单的量化小策略.
+
+# 3.2.2 实例1正态分布买入策略
+# 继续使用之前生成的200只股票504天的服从正态分布涨跌数据，保留后50天的随机数据作为策略验证数据，统计前454天中跌幅最大的3只股票，假设在第454天买入这3只股票。看结果
+# np.sort()针对序列进行排序
+# np.argsort()将展示排序的原序列号
+# 保留50天的随机数据作为策略验证数据
+keep_days = 50
+# 统计前454天中的200只股票的涨跌数据，切片切出0-454day,view_days = 504
+stock_day_change_test = stock_day_change[:stock_cnt, 0:view_day-keep_days]
+# 打印出前454天中跌幅最大的3只股票，总跌幅通过np.sum()函数计算，np.sort()函数对结果排序
+print(np.sort(np.sum(stock_day_change_test, axis=1))[:3])
+# 使用np.argsort()函数针对股票跌幅进行排序，返回序号，即符合买入条件的股票序号
+stock_lower_array = np.argsort(np.sum(stock_day_change_test, axis=1))[:3]
+# 输出符合买入条件的股票序号
+stock_lower_array
+
+# 上面输出第一个序列中的元素分别代表3只跌幅最大的股票前454日总共下跌的幅度，可看到跌幅最大的股票下跌，和第二第三下跌的幅度，股票在NumPy对象stock_day_change中的序号
+# 封装函数show_buy_lower()可视化选中的前三只跌幅最大的股票454日走势，以及从第454日买入后的趋势
+def show_buy_lower(stock_ind):
+    '''
+    :param stock_ind:股票序号，即在stock_day_change中位置
+    :return:
+    '''
+    # 设置一个一行两列的可视化图标
+    _, axs = plt.subplots(nrows=1, ncols=2, figsize=(16,5))
+    # view_days504 - keep_days50 = 454:view_days504
+    # 绘制前454天开始到504天的股票走势,序列连续求和np.cumsum(), cumsum()函数[a,b,c,d].cumsum() = [a,a+b,a+b+c,a+b+c+d]
+    axs[0].plot(np.arange(0, view_day - keep_days), stock_day_change_test[stock_ind].cumsum())
+    # [view_day504 - keep_days50 = 454:view_day504]
+    # 从第454天开始到504天的股票走势
+    cs_buy = stock_day_change[stock_ind][view_day-keep_days:view_day].cumsum()
+    # 绘制从第454天到504天中股票的走势图
+    axs[1].plot(np.arange(view_day - keep_days, view_day), cs_buy)
+    # 返回从第454天开始到504天计算盈亏的盈亏序列的最后一个值
+    return cs_buy[-1]
+
+# 假设等权重地买入3只股票
+# 最后输出的盈亏比
+profit = 0
+# 遍历跌幅最大的3只股票序号序列
+for stock_ind in stock_lower_array:
+    # profit即3只股票从第454天买入开始计算，直到最后一天的盈亏比
+    profit += show_buy_lower(stock_ind)
+# str.format()支持{:.2f}形式保留两位小数
+print('买入第{}只股票，从第454个交易日开始持有盈亏：{:.2f}%'.format(stock_lower_array, profit))
+
+# 这个策略之所以可以盈利，是由于，通过np.random.standard_normal()建立的服从正态分布的涨跌数据，这样我们买入前454天中跌幅最大的3只股票的理论一句就是按照正态分布理论，这三只股票后期涨跌分布一定是涨的概率大于跌的概率
+
+
+
+# 3.4伯努利分布
+'''
+3.4.1
+伯努利分布是很简单的离散分布，随机变量只可能两个可能取值，即1和0，如果随机变量取值1的概率为p,那么0的概率为1-p
+NumPy中使用numpy.random.binomial(1,p)来获取1的概率为p的前提下，生成随机变量，如果p=0.5，就类似抛硬币
+'''
+
+# 3.4.2
+# 如何在交易中获取优势
+# 实现函数casino()函数，假设有100个赌徒，每个赌徒都有1000000元，并且每个人都想在赌场玩1000万次，在不同胜率、赔率和手续费下casino()函数返回总体统计结果：
+gamblers =100
+def casino(win_rate, win_once=1, loss_once=1, commission=0.01):
+    '''
+    赌场：简单设定每个赌徒都有1000000元，并且每个赌徒都想玩10000000次，
+    但是如果没钱了就别想玩了
+    win_rate输赢的概率
+    win_once每次赢钱数
+    loss_once每次输钱数
+    commission手续费这里简单设置为0.01 1%
+    :return:
+    '''
+    my_money = 1000000
+    play_cnt = 10000000
+    commission = commission
+    for _ in np.arange(0, play_cnt):
+        w = np.random.binomial(1, win_rate)
+        if w:
+            my_money+= win_once
+        else:
+            my -= loss_once
+        my_money -= commission
+        if my_money <= 0:
+            break
+    return my_money
+
+
+
+# 第四章
+# 4.1基本操作方法
+# 4.1.1DataFrame构建方法
+import pandas as pd
+# 以NumPy的200只股票，和504天为例子
+stock_day_change = np.load('./gen/stock_day_change.npy')
+stock_day_change.shape
+
+# NumPy访问数据有缺陷，不容易
+pd.DataFrame(stock_day_change).head()
+pd.DataFrame(stock_day_change).tail()
+pd.DataFrame(stock_day_change)[:5]
+
+# 4.1.2索引行列序列
+# 下面使用股票0，股票1为例
+stock_symbols = ['股票'+str(x) for x in range(stock_day_change.shape[0])]
+# 通过构造直接设置index参数，head(2)
+
+'''
+下面使用pd.date_range()函数生成一组连续的时间序列，使用生成的序列作为DataFrame的列索引，代表每一个交易日，通过columns参数传入时间序列初始化DataFrame对象。
+'''
+# 从2017-1-1向上时间递进，单位freg='1d'即1天
+days = pd.date_range('2017-1-1', periods = stock_day_change.shape[1], freq='1d')
+# 股票0 ->股票stock_day_change.shape[0]
+stock_symbols = ['股票'+ str(x) for x in range(stock_day_change.shape[0])]
+# 分别设置index和columns
+df = pd.DataFrame(stock_day_change, index=stock_symbols, columns=days)
+df.head(2)
+
+
+# 4.1.3金融时间序列
+'''
+在量化分析中最常见的数据类型是金融时间序列，对于时间序列，pandas拥有非常丰富友好的方法来分析挖掘数据。下面的代码首先将数据df做个转置，得到行索引为时间，列索引为股票代码的金融时间序列。
+'''
+df = df.T
+df.head()
+
+'''
+以下代码对df进行重新采样，以21天为周期，对21天内的时间平均来重新塑造数据。
+'''
+df_20 = df.resample('21D', how='mean')
+df_20.head()
+
+# 4.1.4Series构建及方法
+'''
+使用上面一个股票的时间序列数据，可以直接通过列索引df['股票0']得到股票0的时间顺序涨跌幅数据，通过type(df_stock0)来查看返回类型，发现返回的是Series类型：
+'''
+df_stock0 = df['股票0']
+
+print(type(df_stock0))
+
+df_stock0.head()
+
+'''
+Series是pandas中另一个非常重要的类，可以简单理解Series是只有一列数据的DataFrame对象，他们之间大多数函数都是可以通用的，使用方式也是和类似，比如上面使用head()函数打印出Series的前5行数据
+'''
+
+df_stock0.cumsum().plot()
+
+'''
+本质上pandas在基于分装NumPy的数据操作上还分装Matplotlib，起到了承上启下的重要作用。
+'''
+
+
+# 4.1.5重采样数据
+'''
+继续之前的resample()函数重采样话题，所有股票网站都提供了日K线，周K线，月K线等周期数据，但最原始的数据只是日K线数据。下面的代码通过重采样实现周K线，月K线的构建。刚刚构建使用how参数的值为’mean‘,下面的代码使用how='ohlc',它代表周期ohlc值，所以结果从一个列的Series变成了有4列数据的DataFrame
+'''
+df_stock0_5 = df_stock0.cumsum().resample('5D',how='ohlc')
+df_stock0_20 = df_stock0.cumsum().resample('21D',how='ohlc')
+
+from abupy import ABuMarketDrawing
+ABuMarketDrawing.plot_candle_stick(df_stock0_5.index,df_stock0_5['open'].values,df_stock0_5['high'].values,df_stock0_5['low'].values,df_stock0_5['close'].values,np.random.random(len(df_stock0_5)),None,'stock',day_sum=False,html_bk=False,save=False)
+
+
+
