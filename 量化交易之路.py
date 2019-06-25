@@ -1141,4 +1141,49 @@ from abupy import ABuMarketDrawing
 ABuMarketDrawing.plot_candle_stick(df_stock0_5.index,df_stock0_5['open'].values,df_stock0_5['high'].values,df_stock0_5['low'].values,df_stock0_5['close'].values,np.random.random(len(df_stock0_5)),None,'stock',day_sum=False,html_bk=False,save=False)
 
 
+# 4.2基本数据分析示例
+'''
+下面使用真正的股票数据构成DataFrame对象，继续学习pandas的使用，
+首先取特斯拉电动车两件的股票数据
+'''
+from abu.abupy import ABuSymbolPd
+# n_folds = 2年
+tsla_df = ABuSymbolPd.make_kl_df('usTSLA', n_folds=2)
+tsla_df.tail()
 
+# 下面使用pandas的plot()函数展示TSLA在统计周期内的大致情况，注意只用一行代码就可以画出走势图
+tsla_df[['close','volume']].plot(subplots=True, style=['r','g'], grid=True)
+
+# pandas的DataFrame对象总览数据的函数info()的用途是查看数据是否缺失，以及各个子数据的数据类型
+tsla_df.info()
+# pandas的DataFrame对象总览数据的函数describe()的用途是，分别展示每组数据的统计信息
+tsla_df.describe()
+
+# 4.2.2索引选取和切片选择
+# NumPy章节讲过使用索引选取序列和切片选择，pandas支持类似NumPy一样的操作，但也可以直接使用列名，行名称，甚至组合使用，特点是需要使用loc或者iloc声明方式。
+# 使用loc配合行动名称，列名称选取切片示例如下：
+tsla_df.loc['2017-07-23':'2017-07-31', 'open']
+# 使用iloc配合行数值及列索引数值选取切片
+# [1:5]:(1,2,3,4),[2,6]:(2,3,4,5)
+tsla_df.iloc[1:5,2:6]
+# 切取所有行
+tsla_df.iloc[:,2:6]
+# 切取所有列
+tsla_df.iloc[35:37]
+
+'''
+混合使用方式，实际项目中使用最频繁的
+'''
+# 指定一个列
+print(tsla_df.close[0:3])
+# 通过组成一个列表选择多个列
+tsla_df[['close','high','low']][0:3]
+
+
+# 4.2.3逻辑条件进行数据筛选
+# 句法结构与NumPy通过逻辑条件进行数据筛选，以下代码筛选出涨跌幅大于8%的交易数据。
+# abs为取绝对值的意思，不是防抱死
+tsla_df[np.abs(tsla_df.p_change)>8]
+
+# 以下代码在筛选满足'涨跌幅大于8%的交易日'的条件基础上，增加条件'交易成交量大于统计周期内的平均值的2.5倍'，完成后筛选出的数据就是股票交易中常说的放量突破（当然可以有更复杂的定义）
+[(np.abs(tsla_df.p_change))]

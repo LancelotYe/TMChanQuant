@@ -5,6 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="62e28bab-170d-485f-814c-257190e8e75a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/TMChanQuant.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TMChanQuant.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/量化交易之路.py" beforeDir="false" afterPath="$PROJECT_DIR$/量化交易之路.py" afterDir="false" />
     </list>
@@ -22,8 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="419">
-              <caret line="1139" selection-start-line="1139" selection-end-line="1140" selection-end-column="248" />
+            <state relative-caret-position="1113">
+              <caret line="1188" column="26" selection-start-line="1188" selection-start-column="26" selection-end-line="1188" selection-end-column="26" />
             </state>
           </provider>
         </entry>
@@ -63,6 +67,7 @@
       <find>import matplotlib.pyplot as plt</find>
       <find>plt</find>
       <find>stock_ind</find>
+      <find>np</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -84,16 +89,18 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="29" />
-    <option name="y" value="-13" />
-    <option name="width" value="1836" />
-    <option name="height" value="1047" />
+    <option name="x" value="-1080" />
+    <option name="y" value="-1254" />
+    <option name="width" value="1080" />
+    <option name="height" value="1920" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -105,14 +112,13 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="ASKED_SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
+    <property name="settings.editor.selected.configurable" value="File.Encoding" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -206,10 +212,12 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-1080" y="-1254" width="1080" height="1920" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.4909091" visible="true" weight="0.15226555" />
-      <window_info id="Structure" order="1" sideWeight="0.5090909" side_tool="true" visible="true" weight="0.15226555" />
+      <window_info active="true" anchor="top" id="Python Console" order="0" side_tool="true" visible="true" weight="0.31820697" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49025974" visible="true" weight="0.18035883" />
+      <window_info id="Structure" order="1" sideWeight="0.50974023" side_tool="true" visible="true" weight="0.18035883" />
       <window_info id="Favorites" order="2" sideWeight="0.50147927" side_tool="true" weight="0.15226555" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -217,12 +225,11 @@
       <window_info anchor="bottom" id="Debug" order="3" weight="0.3995381" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="TODO" order="6" weight="0.3286334" />
-      <window_info anchor="bottom" id="Version Control" order="7" weight="0.3286334" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.19956616" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32822758" />
+      <window_info anchor="bottom" id="Version Control" order="7" weight="0.32822758" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.19912472" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Python Console" order="10" visible="true" weight="0.3438178" />
-      <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32968238" />
+      <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.32968238" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -240,128 +247,22 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/.PyCharmCE2019.1/system/python_stubs/809347816/_functools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="24" column="8" selection-start-line="24" selection-start-column="8" selection-end-line="24" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharmCE2019.1/system/python_stubs/809347816/builtins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-262">
-          <caret line="815" column="8" selection-start-line="815" selection-start-column="8" selection-end-line="815" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/scipy/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="28" column="47" lean-forward="true" selection-start-line="27" selection-start-column="34" selection-end-line="28" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/scipy/misc/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="23" column="21" lean-forward="true" selection-start-line="23" selection-start-column="21" selection-end-line="23" selection-end-column="21" />
-          <folding>
-            <element signature="e#557#621#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/distributions/edgeworth.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="26" lean-forward="true" selection-start-line="7" selection-start-column="26" selection-end-line="7" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/abupy/MarketBu/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/abupy/MarketBu/ABuDataBase.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="111">
-          <caret line="24" column="43" selection-start-line="24" selection-start-column="43" selection-end-line="34" selection-end-column="33" />
-          <folding>
-            <element signature="e#36#74#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/tsa/regime_switching/markov_switching.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="83">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/graphics/functional.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/sandbox/stats/runs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="24" selection-start-line="24" selection-end-line="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/sandbox/nonparametric/kernels.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="400">
-          <caret line="38" column="21" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
-          <folding>
-            <element signature="e#430#496#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/stats/moment_helpers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
-          <caret line="16" selection-start-line="16" selection-end-line="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://E:/Users/0/AppData/Local/Programs/Python/Python37/Lib/concurrent/futures/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="207">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/numpy/random/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1407" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/numpy/core/function_base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="37" selection-start-line="37" selection-end-line="38" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/matplotlib/pyplot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="2785" column="4" selection-start-line="2785" selection-start-column="4" selection-end-line="2785" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/review/量化交易之路.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2019.1/system/python_stubs/809347816/_functools.py" />
+    <entry file="file://$USER_HOME$/.PyCharmCE2019.1/system/python_stubs/809347816/builtins.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/scipy/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/scipy/misc/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/distributions/edgeworth.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/abupy/MarketBu/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/abupy/MarketBu/ABuDataBase.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/tsa/regime_switching/markov_switching.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/graphics/functional.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/sandbox/stats/runs.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/sandbox/nonparametric/kernels.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/statsmodels/stats/moment_helpers.py" />
+    <entry file="file://E:/Users/0/AppData/Local/Programs/Python/Python37/Lib/concurrent/futures/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/numpy/random/__init__.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/numpy/core/function_base.py" />
+    <entry file="file://$PROJECT_DIR$/venv/Lib/site-packages/matplotlib/pyplot.py" />
     <entry file="file://$APPLICATION_HOME_DIR$/helpers/pydev/_pydev_bundle/pydev_import_hook.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="300">
@@ -374,10 +275,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="419">
-          <caret line="1139" selection-start-line="1139" selection-end-line="1140" selection-end-column="248" />
+        <state relative-caret-position="1113">
+          <caret line="1188" column="26" selection-start-line="1188" selection-start-column="26" selection-end-line="1188" selection-end-column="26" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/review/量化交易之路.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
   </component>
 </project>
