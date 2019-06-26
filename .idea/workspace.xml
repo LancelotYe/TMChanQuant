@@ -5,10 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="62e28bab-170d-485f-814c-257190e8e75a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/TMChanQuant.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/TMChanQuant.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/量化交易之路.py" beforeDir="false" afterPath="$PROJECT_DIR$/量化交易之路.py" afterDir="false" />
     </list>
@@ -26,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/量化交易之路.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1113">
-              <caret line="1188" column="26" selection-start-line="1188" selection-start-column="26" selection-end-line="1188" selection-end-column="26" />
+            <state relative-caret-position="754">
+              <caret line="1225" lean-forward="true" selection-start-line="1225" selection-end-line="1225" />
             </state>
           </provider>
         </entry>
@@ -215,9 +211,9 @@
     <frame x="-1080" y="-1254" width="1080" height="1920" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" anchor="top" id="Python Console" order="0" side_tool="true" visible="true" weight="0.31820697" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49025974" visible="true" weight="0.18035883" />
-      <window_info id="Structure" order="1" sideWeight="0.50974023" side_tool="true" visible="true" weight="0.18035883" />
+      <window_info anchor="top" id="Python Console" order="0" side_tool="true" visible="true" weight="0.31820697" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49026346" visible="true" weight="0.18035883" />
+      <window_info id="Structure" order="1" sideWeight="0.50973654" side_tool="true" visible="true" weight="0.18035883" />
       <window_info id="Favorites" order="2" sideWeight="0.50147927" side_tool="true" weight="0.15226555" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
@@ -227,7 +223,7 @@
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32822758" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.32822758" />
-      <window_info anchor="bottom" id="Terminal" order="8" weight="0.19912472" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="8" visible="true" weight="0.19867183" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
       <window_info anchor="bottom" id="Inspection Results" order="10" weight="0.32968238" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -275,8 +271,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/量化交易之路.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1113">
-          <caret line="1188" column="26" selection-start-line="1188" selection-start-column="26" selection-end-line="1188" selection-end-column="26" />
+        <state relative-caret-position="754">
+          <caret line="1225" lean-forward="true" selection-start-line="1225" selection-end-line="1225" />
         </state>
       </provider>
     </entry>

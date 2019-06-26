@@ -1186,4 +1186,40 @@ tsla_df[['close','high','low']][0:3]
 tsla_df[np.abs(tsla_df.p_change)>8]
 
 # 以下代码在筛选满足'涨跌幅大于8%的交易日'的条件基础上，增加条件'交易成交量大于统计周期内的平均值的2.5倍'，完成后筛选出的数据就是股票交易中常说的放量突破（当然可以有更复杂的定义）
-[(np.abs(tsla_df.p_change))]
+tsla_df[(np.abs(tsla_df.p_change)>8) & (tsla_df.volume > 2.5*tsla_df.volume.mean())]
+
+
+
+# 4.2.4数据转换与规整
+# 1.数据序列值排序
+# 以下代码对涨跌幅进行排序
+tsla_df.sort_index(by='p_change')[:5]
+
+# 降序排列
+tsla_df.sort_index(by='p_change', ascending=False)
+
+# 2.缺失数据处理
+# pandas在对缺失数据的处理上接口友好程度相对NumPy大幅提升
+# 如果一行数据中存在na就删除这一行
+tsla_df.dropna()
+# 通过how控制，如果一行的数据中全部都是na就删除行
+tsla_df.dropna(how='all')
+# 使用指定值填充na，inplace代表就地操作，即不返回新的序列在原始序列上修改,就是覆盖原来数据
+tsla_df.fillna(tsla_df.mean(), inplace=True)
+
+# 3.数据转化处理
+# pct_change()函数对序列从第二项开始向前做减法后再除以前一项，这个操作在股票量化等领域经常使用，因为pct_change()针对价格序列的操作结果即是涨跌幅序列。即pct_change（a,b,c）= (na, b-a/a, c-b/b)
+tsla_df.close[:3]
+
+tsla_df.close.pct_change()[:3]
+
+# round函数使用如下
+change_ratio = tsla_df.p_change
+np.round(change_ratio[-5:] * 100, 2)
+
+# 下面使用Series对象的map(0函数针对列数据atr21，来实现同样的功能。
+format = lambda x: '%.2f'%x
+tsla_df.atr21.map(format).tail()
+
+# 4.2.5数据本地序列化操作
+# pandas的I/O操作API的最主要格式有CSV,SQL,XLS,JSON,HDF5针对量化领域最常使用的是CSV格式和HDF5格式。下面展示CSV使用，abu使用的是HDF5
