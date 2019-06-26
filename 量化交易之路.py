@@ -1141,4 +1141,137 @@ from abupy import ABuMarketDrawing
 ABuMarketDrawing.plot_candle_stick(df_stock0_5.index,df_stock0_5['open'].values,df_stock0_5['high'].values,df_stock0_5['low'].values,df_stock0_5['close'].values,np.random.random(len(df_stock0_5)),None,'stock',day_sum=False,html_bk=False,save=False)
 
 
+# 4.2基本数据分析示例
+'''
+下面使用真正的股票数据构成DataFrame对象，继续学习pandas的使用，
+首先取特斯拉电动车两件的股票数据
+'''
+from abu.abupy import ABuSymbolPd
+# n_folds = 2年
+tsla_df = ABuSymbolPd.make_kl_df('usTSLA', n_folds=2)
+tsla_df.tail()
 
+# 下面使用pandas的plot()函数展示TSLA在统计周期内的大致情况，注意只用一行代码就可以画出走势图
+tsla_df[['close','volume']].plot(subplots=True, style=['r','g'], grid=True)
+
+# pandas的DataFrame对象总览数据的函数info()的用途是查看数据是否缺失，以及各个子数据的数据类型
+tsla_df.info()
+# pandas的DataFrame对象总览数据的函数describe()的用途是，分别展示每组数据的统计信息
+tsla_df.describe()
+
+# 4.2.2索引选取和切片选择
+# NumPy章节讲过使用索引选取序列和切片选择，pandas支持类似NumPy一样的操作，但也可以直接使用列名，行名称，甚至组合使用，特点是需要使用loc或者iloc声明方式。
+# 使用loc配合行动名称，列名称选取切片示例如下：
+tsla_df.loc['2017-07-23':'2017-07-31', 'open']
+# 使用iloc配合行数值及列索引数值选取切片
+# [1:5]:(1,2,3,4),[2,6]:(2,3,4,5)
+tsla_df.iloc[1:5,2:6]
+# 切取所有行
+tsla_df.iloc[:,2:6]
+# 切取所有列
+tsla_df.iloc[35:37]
+
+'''
+混合使用方式，实际项目中使用最频繁的
+'''
+# 指定一个列
+print(tsla_df.close[0:3])
+# 通过组成一个列表选择多个列
+tsla_df[['close','high','low']][0:3]
+
+
+# 4.2.3逻辑条件进行数据筛选
+# 句法结构与NumPy通过逻辑条件进行数据筛选，以下代码筛选出涨跌幅大于8%的交易数据。
+# abs为取绝对值的意思，不是防抱死
+tsla_df[np.abs(tsla_df.p_change)>8]
+
+# 以下代码在筛选满足'涨跌幅大于8%的交易日'的条件基础上，增加条件'交易成交量大于统计周期内的平均值的2.5倍'，完成后筛选出的数据就是股票交易中常说的放量突破（当然可以有更复杂的定义）
+tsla_df[(np.abs(tsla_df.p_change)>8) & (tsla_df.volume > 2.5*tsla_df.volume.mean())]
+
+
+
+# 4.2.4数据转换与规整
+# 1.数据序列值排序
+# 以下代码对涨跌幅进行排序
+tsla_df.sort_index(by='p_change')[:5]
+
+# 降序排列
+tsla_df.sort_index(by='p_change', ascending=False)
+
+# 2.缺失数据处理
+# pandas在对缺失数据的处理上接口友好程度相对NumPy大幅提升
+# 如果一行数据中存在na就删除这一行
+tsla_df.dropna()
+# 通过how控制，如果一行的数据中全部都是na就删除行
+tsla_df.dropna(how='all')
+# 使用指定值填充na，inplace代表就地操作，即不返回新的序列在原始序列上修改,就是覆盖原来数据
+tsla_df.fillna(tsla_df.mean(), inplace=True)
+
+# 3.数据转化处理
+# pct_change()函数对序列从第二项开始向前做减法后再除以前一项，这个操作在股票量化等领域经常使用，因为pct_change()针对价格序列的操作结果即是涨跌幅序列。即pct_change（a,b,c）= (na, b-a/a, c-b/b)
+tsla_df.close[:3]
+
+tsla_df.close.pct_change()[:3]
+
+# round函数使用如下
+change_ratio = tsla_df.p_change
+np.round(change_ratio[-5:] * 100, 2)
+
+# 下面使用Series对象的map(0函数针对列数据atr21，来实现同样的功能。
+format = lambda x: '%.2f'%x
+tsla_df.atr21.map(format).tail()
+
+# 4.2.5数据本地序列化操作
+# pandas的I/O操作API的最主要格式有CSV,SQL,XLS,JSON,HDF5针对量化领域最常使用的是CSV格式和HDF5格式。下面展示CSV使用，abu使用的是HDF5
+
+# 使用to_csv保存dataframe对象，columns列名称
+tsla_df.to_csv('./gen/tsla_df.csv', columns=tsla_df.columns, index=True)
+
+# 使用read_csv读取
+tsla_df_load = pd.read_csv('./gen/tsla_df.csv', parse_date = True, index_col=0)
+
+# 查看从文件中重新读取dataframe对象
+tsla_df_load.tail()
+
+
+# 4.3实例1：寻找股票异动涨跌幅阀值
+# 美股交易没有涨停、跌停的概念，全靠市场自己调节。这样的话公司市值及流通性对涨跌幅有着至关重要的意义，对于谷歌等市值高，流动性好的公司，也许3%~5%的振幅已经很高了；但对于很多市值小，流通性不好的股票，也许每天5%以上的振幅是一种常态。如果把涨跌数据分类成10份，Top10%振幅的就认为是异常表现的振幅，我们的需求是鉴定TSLA的异常振幅阀值是多少。
+# 下面首先通过直方图hist，对tsla_df.p_change有个感性的认识。
+tsla_df.p_change.hist(bins=80)
+# x坐标代表分散成80等份的区间  y坐标代表分散成80等份的区间划分下的个数
+# 使用qcut()函数将涨跌幅数据进行平均分类，这里分为10份，value_counts()函数经常和qcut()函数一起使用，便于更直观地显示分离结果。
+# value_counts()的使用需要记住，只有Series对象才有value_counts()方法。
+
+cats = pd.qcut(np.abs(tsla_df.p_change), 10)
+cats.value_counts()
+
+
+# 4.3.1数据离散化
+# 前面的pd.qcut()将数据平均分为若干份，如果交易者有自己的分类准则，那么应该使用pd.cut()传入bins
+# 将涨跌幅数据手工分类，从负无穷到-7,-5,-3,0,3,5,7,正无穷
+bins = [-np.inf, -7.0, -5, -3, 0, 3, 5, 7, np.inf]
+cats = pd.cut(tsla_df.p_change, bins)
+cats.value_counts()
+# pd.cut()函数经常会和pd.get_dummies()函数配合使用，将数据由连续数值类型变成离散类型，即将数据离散化，get_dummies()操作后生成哑变量矩阵
+# cr_dummies为列名称前缀
+change_ration_dummies = pd.get_dummies(cats, prefix='cr_dummies')
+change_ration_dummies.tail()
+
+
+y = np.random.randn(10000,1)
+x = list(range(-4,4,1))
+n = plt.hist(y,x)
+# 统计Y在X这个区间划分下的个数
+
+
+# 4.3.2concat,append,merge的使用
+# 如果我们把上面得到的change_ration_dummies表格与tsla_df进行合并，那么最简单的方式是直接使用concat()函数
+pd.concat([tsla_df, change_ration_dummies], axis=1).tail()#列数据对应
+# 上述concat()函数是在axis=1,即纵向上的连续数据，如果横轴上的连续收据，同样可使用concat axis=0，但是更加简单的方式是直接使用append()函数
+# pd.concat()函数的连续axis=0,纵向连接atr>14的df和p_change>10的df
+pd.concat([tsla_df[tsla_df.p_change > 10],tsla_df[tsla_df.atr21 > 16]], axis = 0)
+tsla_df[tsla_df.p_change > 10].append(tsla_df[tsla_df.atr21>16])
+# 用于pandas数据连结归并除上述pd.concat()和append()外，还会使用到pd.merge()函数，他的使用最复杂，参数组合组多，但也是灵活性最强的方式。特别是针对多个不同key的序列，但由于量化分析一般需要处理的都是时间序列
+stock_a = pd.DataFrame({'stock_a':['a','b','c','d','a'],'data':range(5)})
+stock_b = pd.DataFrame({'stock_b':['a','b','c'],'data2':range(3)})
+pd.merge(stock_a,stock_b,left_on='stock_a',right_on='stock_b')
