@@ -1277,3 +1277,93 @@ stock_a = pd.DataFrame({'stock_a':['a','b','c','d','a'],'data':range(5)})
 stock_b = pd.DataFrame({'stock_b':['a','b','c'],'data2':range(3)})
 pd.merge(stock_a,stock_b,left_on='stock_a',right_on='stock_b')
 
+# 4.4实例2：星期几是这个股票的好日子
+# 下面实例展示就是分析TSLA的数据,从数据中发现周几是TSLA的'好日子'
+# tsla_df数据中date_week字段代表周几，首先使用np.where()为DataFrame对象添加一列新数据positive，代表交易日当天股票上涨还是下跌
+tsla_df['positive'] = np.where(tsla_df.p_change > 0, 1, 0)
+tsla_df.tail()
+
+# 4.4.1构建交叉表
+# 使用pd.crosstab()构建一个交叉表，行使用data_week信息，列使用positive
+'''
+交叉表的：集合周几的positive的数量
+'''
+xxt = pd.crosstab(tsla_df.date_week, tsla_df.positive)
+xt = pd.crosstab(tsla_df.positive, tsla_df.date_week)
+xxt
+# 下面的代码是经常和pd.crosstab()配套出现的代码，
+xt_pct=xxt.div(xxt.sum(1).astype(float), axis=0)
+
+xt_pct.plot(figsize=(8,5),kind='bar',stacked=True,title='date_week -> positive')
+plt.xlabel('date_week')
+plt.ylabel('positive')
+
+
+# 4.4.2构建透视表
+'''
+前面的操作可以用更简单的工具pivot_table()（透视表）求出结果
+'''
+tsla_df.pivot_table(['positive'], index=['date_week'])
+# 如下代码所示，和crosstab(),pivot_table()有着类似功能的是groupby()函数，函数操作更加底层，句法也更难理解，但是可以解决的问题也更加全面。对于pandaas，首先学会使用crosstab()和pivot_table()函数，遇到这类问题一般都可以通过他们来解决。
+tsla_df.groupby(['date_week','positive'])['positive'].count()
+
+# 4.5实例3：跳空缺口
+# 跳空缺口是指股价开盘价高于昨天的最高价或低于昨天的最低价，使K线图出现空挡的现象。
+'''
+普通缺口：特点就是很快被回补，价格在几天内就会回补
+突破缺口：当价格或成交量伴随跳空（向上或者向下）跳出震荡区，则预示着新趋势的形式
+衰竭缺口：缺口没有很快回补，走势也反复无常，最终慢慢地回补缺口，预示着市场走势将可能有剧烈的反转
+'''
+# 下面根据上面描述的理论来寻找TSLA电动车的跳空缺口，但并不是使用传统的跳空定义方式，因为这种方式很容易夹杂普通缺口，这列定义缺口的方式如下。
+# 今天如果是上涨缺失，那么跳空的确定需要今天的最低价格大于昨天收盘价格一个阀值以上，确定为跳空
+# 今天如果是下跌，那么跳空的确定需要昨天的收盘价大于今天的最高价格一个阀值以上，确定向下跳空
+# 这种方式确定的跳空缺口存在很强的支撑或者阻力，首先确定跳空阀值，这里的计算方式是使用统计周期内收盘价格的中位数的3%：
+jump_threshold = tsla_df.close.median() * 0.03
+jump_threshold
+
+# 接下来使用for循环遍历每一个交易日，按照上面描述的确定跳空方式来寻找跳空缺口。这里新建了一张表格来存储跳空数据jump_pd
+# jump代表跳空方向，方便之后的数据处理
+# jump_power代表跳空的能量，这里的能量计算是由缺口的高度除以阀值获得，能量再次量化了支撑或者阻力的大小
+jump_pd = pd.DataFrame()
+def judge_jump(today):
+    global jump_pd
+    if today.p_change > 0 and (today.low - today.pre_close) > jump_threshold:
+        '''
+        符合向上跳空
+        '''
+        # jump记录方向1向上
+        today['jump'] = 1
+        # 向上跳能量=（今天最低-昨收）/跳空阀值
+        today['jump_power'] = (today.low - today.pre_close)/jump_threshold
+        jump_pd = jump_pd.append(today)
+    elif today.p_change < 0 and (today.pre_close - today.high) > jump_threshold:
+        '''
+        符合向下跳空
+        '''
+        # jump记录方向 -1向下
+        today['jump'] = -1
+        # 向下跳能量 = （昨收 - 今天最高）/跳空阀值
+        today['jump_power'] = (today.pre_close - today.high)/jump_threshold
+        jump_pd = jump_pd.append(today)
+
+for kl_index in np.arange(0, tsla_df.shape[0]):
+    # 通过ix一个一个拿
+    today = tsla_df.ix[kl_index]
+    judge_jump(today)
+#filter 按照顺序只显示这些列
+jump_pd.filter(['jump','jump_power','close','date','p_change','pre_close'])
+
+'''
+输出结果jump_pd为符合跳空筛选的交易日，注意观察jump_power可以发现，跳空能量呃涨跌幅值成正比。
+上面实现的代码虽然可以正常运行，输出结果也没有问题，但是pandas对象中有另一种优雅的方式针对上面的for循环优化写法和效率，即使用apply()函数。该函数接受一个处理函数作为参数，处理函数默认只有一个参数也就是行或列数据，通过axis参数确定是行还是列，如果处理函数需要另外的参数配合，可以通过args参数，它接受一个tuple来扩展。使用apply()代替上述for循环实现方式如下:
+'''
+jump_pd = pd.DataFrame()
+# axis=1即行数据，tsla_df的每一条行数据即为每一个交易日数据
+tsla_df.apply(judge_jump, axis=1)
+'''
+上面使用apply函数筛选出的jump_pd与for循环的结果是一致的
+'''
+# 以下代码使用ABuMarketDrawing将走势和选取的跳空缺口一起画出并标示
+from abu.abupy import ABuMarketDrawing
+# view_idnexs传入jump_pd.index,即在K线图上使用圆圈来标示跳空点
+ABuMarketDrawing.plot_candle_form_klpd(tsla_df, view_indexs=jump_pd.index)
