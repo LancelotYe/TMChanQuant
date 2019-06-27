@@ -1224,3 +1224,56 @@ tsla_df.atr21.map(format).tail()
 # 4.2.5数据本地序列化操作
 # pandas的I/O操作API的最主要格式有CSV,SQL,XLS,JSON,HDF5针对量化领域最常使用的是CSV格式和HDF5格式。下面展示CSV使用，abu使用的是HDF5
 
+
+# 使用to_csv保存dataframe对象，columns列名称
+tsla_df.to_csv('./gen/tsla_df.csv', columns=tsla_df.columns, index=True)
+
+# 使用read_csv读取
+tsla_df_load = pd.read_csv('./gen/tsla_df.csv', parse_date = True, index_col=0)
+
+# 查看从文件中重新读取dataframe对象
+tsla_df_load.tail()
+
+
+# 4.3实例1：寻找股票异动涨跌幅阀值
+# 美股交易没有涨停、跌停的概念，全靠市场自己调节。这样的话公司市值及流通性对涨跌幅有着至关重要的意义，对于谷歌等市值高，流动性好的公司，也许3%~5%的振幅已经很高了；但对于很多市值小，流通性不好的股票，也许每天5%以上的振幅是一种常态。如果把涨跌数据分类成10份，Top10%振幅的就认为是异常表现的振幅，我们的需求是鉴定TSLA的异常振幅阀值是多少。
+# 下面首先通过直方图hist，对tsla_df.p_change有个感性的认识。
+tsla_df.p_change.hist(bins=80)
+# x坐标代表分散成80等份的区间  y坐标代表分散成80等份的区间划分下的个数
+# 使用qcut()函数将涨跌幅数据进行平均分类，这里分为10份，value_counts()函数经常和qcut()函数一起使用，便于更直观地显示分离结果。
+# value_counts()的使用需要记住，只有Series对象才有value_counts()方法。
+
+cats = pd.qcut(np.abs(tsla_df.p_change), 10)
+cats.value_counts()
+
+
+# 4.3.1数据离散化
+# 前面的pd.qcut()将数据平均分为若干份，如果交易者有自己的分类准则，那么应该使用pd.cut()传入bins
+# 将涨跌幅数据手工分类，从负无穷到-7,-5,-3,0,3,5,7,正无穷
+bins = [-np.inf, -7.0, -5, -3, 0, 3, 5, 7, np.inf]
+cats = pd.cut(tsla_df.p_change, bins)
+cats.value_counts()
+# pd.cut()函数经常会和pd.get_dummies()函数配合使用，将数据由连续数值类型变成离散类型，即将数据离散化，get_dummies()操作后生成哑变量矩阵
+# cr_dummies为列名称前缀
+change_ration_dummies = pd.get_dummies(cats, prefix='cr_dummies')
+change_ration_dummies.tail()
+
+
+y = np.random.randn(10000,1)
+x = list(range(-4,4,1))
+n = plt.hist(y,x)
+# 统计Y在X这个区间划分下的个数
+
+
+# 4.3.2concat,append,merge的使用
+# 如果我们把上面得到的change_ration_dummies表格与tsla_df进行合并，那么最简单的方式是直接使用concat()函数
+pd.concat([tsla_df, change_ration_dummies], axis=1).tail()#列数据对应
+# 上述concat()函数是在axis=1,即纵向上的连续数据，如果横轴上的连续收据，同样可使用concat axis=0，但是更加简单的方式是直接使用append()函数
+# pd.concat()函数的连续axis=0,纵向连接atr>14的df和p_change>10的df
+pd.concat([tsla_df[tsla_df.p_change > 10],tsla_df[tsla_df.atr21 > 16]], axis = 0)
+tsla_df[tsla_df.p_change > 10].append(tsla_df[tsla_df.atr21>16])
+# 用于pandas数据连结归并除上述pd.concat()和append()外，还会使用到pd.merge()函数，他的使用最复杂，参数组合组多，但也是灵活性最强的方式。特别是针对多个不同key的序列，但由于量化分析一般需要处理的都是时间序列
+stock_a = pd.DataFrame({'stock_a':['a','b','c','d','a'],'data':range(5)})
+stock_b = pd.DataFrame({'stock_b':['a','b','c'],'data2':range(3)})
+pd.merge(stock_a,stock_b,left_on='stock_a',right_on='stock_b')
+
