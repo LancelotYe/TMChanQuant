@@ -1367,3 +1367,45 @@ tsla_df.apply(judge_jump, axis=1)
 from abu.abupy import ABuMarketDrawing
 # view_idnexs传入jump_pd.index,即在K线图上使用圆圈来标示跳空点
 ABuMarketDrawing.plot_candle_form_klpd(tsla_df, view_indexs=jump_pd.index)
+
+
+# 4.6pandas 三维面板的使用
+# pandas最常用的对象：Series（一维带索引的序列数据）DataFrame（二维矩阵，由行索引，列索引和数据矩阵组成）
+'''
+对于更高维度的数据，由于多个纬度理解难度将呈几何级数增长，可视化不方便等问题，实际工程中的用途并不广泛，但有些情况下使用高维数据结构也会带来高效和灵活度的提升。
+'''
+# 使用abu量化系统的
+from abu.abupy import ABuIndustries
+r_symbol = 'usTSLA'
+# 这里获取了和TSLA点动成处于同意行业的股票，组成pandas三维面板panel数据
+p_date, _ = ABuIndustries.get_industries_panel_from_target(r_symbol, show=False)
+# 通过type()函数来看一下p_date的类型
+type(p_date)
+# <class 'pandas.core.panel.Panel'>
+# Dimensions: 7 (items) x 380 (major_axis) x 12 (minor_axis)
+# Items axis: usF to usTTM
+# Major_axis axis: 2017-06-28 00:00:00 to 2018-12-31 00:00:00
+# Minor_axis axis: close to atr14
+p_date['usTTM'].head()
+# 高维的Panel通过轴向的转换等空间操作，可以高效灵活地变幻出各种数据形式
+'''
+Panel的swapaxes()方法指定交互items,minor轴向的空间位置，转换后的结果显示三维面板Panel由原来的7 (items) x 380 (major_axis) x 12 (minor_axis)变成12*380*7的数据结构
+'''
+p_data_it = p_date.swapaxes('items','minor')
+
+'''
+通过拿出item axis 中的close来选取所有股票的close，形成一个新的横切面数据
+'''
+p_data_it_close = p_data_it['close'].dropna(axis=0)
+p_data_it_close
+
+'''
+将所有股票的close数据序列化标准化后可视化
+'''
+from abu.abupy import ABuScalerUtil
+# scaler_std将所有close的切面数据做标准化，为了可视化在同一范围
+p_data_it_close = ABuScalerUtil.scaler_std(p_data_it_close)
+p_data_it_close.plot()
+plt.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+plt.ylabel('Price')
+plt.xlabel('Time')
