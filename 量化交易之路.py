@@ -1409,3 +1409,93 @@ p_data_it_close.plot()
 plt.legend(bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
 plt.ylabel('Price')
 plt.xlabel('Time')
+
+
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+################5##################################5##################################5##################################5##################
+########################################################################################################################################################
+########################################################################################################################################################
+########################################################################################################################################################
+
+# Matplotlib是python上最基础也最常用的可视化工具
+import matplotlib.pyplot as plt
+from abu.abupy import ABuSymbolPd
+tsla_df = ABuSymbolPd.make_kl_df('usTSLA', n_folds=2)
+tsla_df.tail()
+
+'''
+plt.plot()是最简单也是最常用的绘图方式，可以通过pandas的Series直接作为参数进行绘制，也可以通过NumPy对象，甚至Python的list对象它都是支持的。
+'''
+def plot_demo(axs=None, just_series=False):
+    '''
+    绘制tsla的收盘价曲线
+    :param axs: 子画布
+    :param just_series: 是否绘制一条收盘曲线使用Series
+    :return:
+    '''
+    # 如果参数传入子画布则使用子画布绘制
+    drawer = plt if axs is None else axs
+    drawer.plot(tsla_df.close, c='r')
+    if not just_series:
+        # 为了使曲线不重叠，y变量加了10哥单位tsla_df.close.values + 10
+        # numpy对象tsla_df.close.index + tsla_df.close.values, 绿色
+        drawer.plot(tsla_df.close.index, tsla_df.close.values + 10, c='g')
+        # 为了使曲线不重叠，y变量加了20个单位
+        # list对象，Numpy.tolist()将Numpy对象转换为list对象，蓝色
+        drawer.plot(tsla_df.close.index.tolist(),(tsla_df.close.values + 20).tolist(), c='b')
+    plt.xlabel('time')
+    plt.ylabel('close')
+    plt.title('TSLA  CLOSE')
+    plt.grid(True)#是否显示网格
+plot_demo()
+
+# 5.1.2matplotlib子画布及loc使用
+# matplotlib使用legend()函数操作标注,参数loc代表标注位置。下面代码通过生成多个子画布使用不同的loc值来示例标注及loc的使用
+_,axs = plt.subplots(nrows=2, ncols=2, figsize=(14,10))
+# 画布0,loc：0 plot_demo中传入画布，则使用传入的画布绘制
+drawer = axs[0][0]
+plot_demo(drawer)
+drawer.legend(['Series', 'Numpy', 'List'], loc = 0)
+# 画布1,loc：1 plot_demo中传入画布，则使用传入的画布绘制
+drawer = axs[0][1]
+plot_demo(drawer)
+drawer.legend(['Series', 'Numpy', 'List'], loc = 1)
+# 画布2,loc：2 plot_demo中传入画布，则使用传入的画布绘制
+drawer = axs[1][0]
+plot_demo(drawer)
+drawer.legend(['Series', 'Numpy', 'List'], loc = 2)
+# 画布3,loc：3 plot_demo中传入画布，则使用传入的画布绘制
+drawer = axs[1][1]
+plot_demo(drawer)
+drawer.legend(['Series', 'Numpy', 'List'], bbox_to_anchor=(1.05,1), loc=2, borderaxespad=0.)
+
+'''
+上述代码使用plt.subplot()函数生成多个子画布，返回的axs是NumPy类型，参数nrows和ncols分别代表x和y轴的shape值，所以plt.subplots(nrows=2, ncols=2, figsize=(14,10))实际会生成一个2*2（两行两列的）NumPy对象axs.在之前plot_demo()函数的基础上使用legend()函数对绘制进行标注，这里loc使用 不同的值，将导致标注的位置发生变化，axs[1][1]演示使用bbox_to_anchor将标注绘制在画布的外面。如果loc无特殊需求，一般使用loc='best'简单指定，即自动选择最优的位置进行标注绘制
+'''
+
+# 5.1.3K线图的绘制
+# Matplotlib对绘制K线图有直接的函数封装，所以使用Matplotlib绘制K线图非常简单。绘制K线图主要的工作就是制作一个qutotes
+# qutotes里每个数据是一根蜡烛，绘制标准K线图使用matplotlib.finance.candlestick_ochl()函数，函数后缀的ochl。另外还有matplotlib.finance.candlestick2_ohlc()函数，后缀ohlc的意思是按照顺序组织数据加入到quotes中。
+
+import matplotlib.finance as mpf
+__colorup__ = 'red'
+__colordown__ = 'green'
+# 为了示例清晰，只拿出前30天的交易数据绘制蜡烛图
+tsla_part_df = tsla_df[:100]
+fig, ax = plt.subplots(figsize=(14,7))
+qutotes = []
+for index, (d,o,c,h,l) in enumerate(zip(tsla_part_df.index, tsla_part_df.open, tsla_part_df.close, tsla_part_df.high, tsla_part_df.low)):
+    # 蜡烛图的日期要使用matplotlib.finance.date2num进行转换为特有的数字值
+    d = mpf.date2num(d)
+    # 日期，开盘，收盘，最高，最低组成tuple对象val
+    val = (d,o,c,h,l)
+    # 将val加入qutotes
+    qutotes.append(val)
+# 使用mpf.candlestick_ochl进行蜡烛绘制，ochl代表：open,close,high,low
+mpf.candlestick_ochl(ax, qutotes, width=0.6, colorup=__colorup__, colordown=__colordown__)
+ax.autoscale_view()
+ax.xaxis_date()
+
+# 5.2使用Bokeh交互可视化
