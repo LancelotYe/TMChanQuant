@@ -1499,3 +1499,158 @@ ax.autoscale_view()
 ax.xaxis_date()
 
 # 5.2使用Bokeh交互可视化
+# 有些时候将一段数据可视化后与偶交互操作的需求。当绘制蜡烛图数量比较多的时候，可能有平移，放大某一时段等交互需求，Python实现这些交互需求解决方案一般通过网页形式的可视化，配合javascript与网页完成交互。
+# Bokeh是一门专门针对Web浏览器实现呈现功能的交互式可视化Python库，具体使用示例
+#
+import pandas as pd
+import numpy as np
+from abu.abupy import ABuMarketDrawing
+ABuMarketDrawing.plot_candle_form_klpd(tsla_df, html_bk=True)
+
+tsla_df.index.datetime()
+
+pd.to_datetime(tsla_df.index)
+
+# 5.3使用pandas可视化数据
+# pandas封装了Matplotlib，使用Matplotlib可以实现的绘制可视化都可以使用pandas用更简单的方式实现。由于pandas是为了金融量化而生的库，包含很多金融量化接口，所以pandas直接可视化金融数据非常简单。
+# 5.3.1绘制股票的收益及收益波动情况
+'''
+计算收益波动一般会使用pd.rolling_std()函数和rolling_std()函数，简单使用示例如下
+'''
+# 示列序列
+demo_list = np.array([2,4,16,20])
+df = pd.DataFrame(demo_list)
+# 以3天为周期计算波动
+demo_window = 3
+# pd.rolling_std * np.sqrt
+
+#pd.rolling_std(demo_list, window=demo_window, center=False) * np.sqrt(demo_window) 无效方法
+
+df.rolling(window=demo_window,center=False).std() * np.sqrt(demo_window)
+# rolling.std 函数的意思是根据参数demo_window的大小，从原始序列依次取出demo_window个元素做std()操作标准差（），波动即等于每次取出子序列std（）之后的结果乘以demon_window开方值
+
+# 上述代码之所以使用np.sqrt()函数开平方demo_window天数，是因为std()函数的计算本是方差开方，如果使用var()函数计算就可以直接使用天数:
+np.sqrt(pd.Series([2,4,16]).var() * demo_window)
+
+# 接下来使用np.log()函数计算投资收益，使用pd.rolling_std()函数计算每20个交易日的移动收益标准差，使用pd.ewmstd()函数，计算每20个交易日的加权移动收益标准差，最后绘制各组数据
+tsla_df_copy = tsla_df.copy()
+# 投资回报
+tsla_df_copy['return'] = np.log(tsla_df['close']/tsla_df['close'].shift(1))
+# 移动收益标准差
+tsla_df_copy['mov_std'] = tsla_df_copy['return'].rolling(window=20,center=False).std()*np.sqrt(20)
+# 加权移动收益标准差与移动收益标准差基本相同，只不过前者根据时间权重计算std
+# tsla_df_copy['std_ewm'] = pd.ewmstd(tsla_df_copy['return'],span=20,min_periods=20,adjust=True)*np.sqrt(20)
+tsla_df_copy['std_ewm'] = tsla_df_copy['return'].ewm(span=20,min_periods=20,adjust=True).std()*np.sqrt(20)  # pd.ewmstd(tsla_df_copy['return'],span=20,min_periods=20,adjust=True)*np.sqrt(20)
+
+tsla_df_copy[['close','mov_std','std_ewm','return']].plot(subplots=True, grid=True)
+
+# 5.3.2绘制股票的价格和均线
+# 以下代码绘制股票的价格30日均线，60日均线，90日均线
+import matplotlib.pyplot as plt
+tsla_df.close.plot()
+#ma 30
+tsla_df.close.rolling(window=30).mean().plot()
+#ma 60
+tsla_df.close.rolling(window=60).mean().plot()
+#ma 90
+tsla_df.close.rolling(window=90).mean().plot()
+# loc='best'即自动寻找适合的位置
+plt.legend(['close','30 mv','60 mv','90 mv'], loc='best')
+
+# 5.3.3其他pandas统计图形种类
+# pandas通过plot（）函数传入kind参数支持绘制其他图形
+# kind参数
+'''
+line
+bar
+barh：横向柱状图
+hist
+kde:绘制密度曲线
+density：同kde
+pie：饼图
+'''
+# 股票中有个概念叫低开高收
+'''
+iloc获取所有低开高走的下一个交易日组成low_to_high_df，由于是下一个交易日所以要对满足条件的交易日再次通过iloc获取，下一个交易日index用key.values +1 ，key序列的值即为0-len(tsla_df),即为交易日index。
+'''
+low_to_high_df = tsla_df.iloc[tsla_df[(tsla_df.close > tsla_df.open) & (tsla_df.key!= tsla_df.shape[0]-1)].key.values + 1]
+
+# 通过where将下一个交易日的涨跌幅通过ceil和floor向上及向下取整
+change_ceil_floor = np.where(low_to_high_df['p_change'] > 0,np.ceil(low_to_high_df['p_change']),np.floor(low_to_high_df['p_change']))
+# 使用pd.Series包裹，方便之后绘制
+change_ceil_floor = pd.Series(change_ceil_floor)
+'''
+(tsla_df.close > tsla_df.open)&(tsla_df.key<>tsla_df.shape[0]-1)设置条件收盘价格大于开盘，且不是数据中最后一个交易日
+使用iloc选取低开高收的下一个交易日行数据
+np.ceil()函数将数据向上取整
+np.floor()函数向下取整
+使用np.where()函数将涨跌>0的值使用ceil取整数，将涨跌<0的值使用floor取整数，不使用astype(int)的目的是不想取0值，否则+0.4和-0.4这种数都会变成0，即丢失了涨跌方向信息
+将np.where()函数返回Numpy数据使用pd.Series包裹，方便绘制
+'''
+# 下面使用subplot()函数生成子画布，plot()函数通过传入ax在不同画布上使用不同kind参数。通过可视化可以看出：在统计周期tsla低开高收的下一个交易日下跌的情况比上涨的情况还要多，而且比较明显。下面代码量化了下跌的Sum与上涨的Sum
+
+print('低开高收的下一个交易日所有下跌的跌幅取整和Sum：' + str(change_ceil_floor[change_ceil_floor < 0].sum()))
+print('低开高收的下一个交易日所有上涨的涨幅取整和Sum：' + str(change_ceil_floor[change_ceil_floor > 0].sum()))
+
+_,axs = plt.subplots(nrows=2, ncols=2, figsize=(12, 10))
+# 柱状图
+change_ceil_floor.value_counts().plot(kind='bar', ax=axs[0][0])
+# 水平柱状图
+change_ceil_floor.value_counts().plot(kind='barh',ax=axs[0][1])
+# 概率密度图
+change_ceil_floor.value_counts().plot(kind='kde', ax=axs[1][0])
+# 圆饼图
+change_ceil_floor.value_counts().plot(kind='pie', ax=axs[1][1])
+
+# 5.4 使用Seaborn可视化数据
+# Seaborn是Matplotlib分装的更高级api，从而作图更加容易
+import seaborn as sns
+# 通过一行代码将直方图以及密度图一起绘制
+sns.distplot(tsla_df['p_change'], bins=80)
+
+# 针对pandas的DataFrame数据，使用列名称定轴绘制箱型图,tsla_df中date_week代表星期几，使用date_week作为x轴，p_change涨跌幅数据作为y轴，使用boxplot()函数绘制箱型图来可视化振幅最大（即p_change普遍偏大）周四箱体最矮，即tsla周四相对股票振幅最小（即p_change普遍偏小）
+
+sns.boxplot(x='date_week',y='p_change',data=tsla_df)
+
+# 通过sns.jointplot()函数，可视化两组数据的相关性即概率密度分布
+sns.jointplot(tsla_df['high'], tsla_df['low'])
+
+# 通过sns.heatmap绘制相关热力图
+# 下面代码使用pd.DataFrame.join()函数的p_change涨跌幅数据接起来组成一个新的DataFrame
+change_df = pd.DataFrame({'tsla':tsla_df.p_change})
+#join usGOOG
+change_df = change_df.join(pd.DataFrame({'goog':ABuSymbolPd.make_kl_df('usGOOG',n_folds=2).p_change}), how='outer')
+# join usAAPL
+change_df = change_df.join(pd.DataFrame({'aapl':ABuSymbolPd.make_kl_df('usAAPL',n_folds=2).p_change}), how='outer')
+# join usFB
+change_df = change_df.join(pd.DataFrame({'fb':ABuSymbolPd.make_kl_df('usFB',n_folds=2).p_change}), how='outer')
+# join usBIDU
+change_df = change_df.join(pd.DataFrame({'bidu':ABuSymbolPd.make_kl_df('usBIDU',n_folds=2).p_change}), how='outer')
+
+change_df = change_df.dropna()
+change_df.head()
+
+# 下面使用pd.DataFrame.corr()函数计算每组数据的协方差，使用热力图展示每组股票涨跌幅的相关性
+
+corr = change_df.corr()
+_,ax = plt.subplots(figsize=(8,5))
+sns.heatmap(corr, ax=ax)
+
+# 5.5实例1：可视化量化策略的交易区间及卖出原因
+# 假定我们运行一个量化策略，执行回测。我们的需求就是在收盘价格时间序列的基础上标明上面这个持有区间
+# 封装函数plot_trade()实现上述需求，使用plt.fill_between()函数填充标注持有区间
+def plot_trade(buy_date,sell_date):
+    # 找出2014-07-28对应时间序列中的index作为start
+    start = tsla_df[tsla_df.index == buy_date].key.values[0]
+    # 找出2014-09-05对应时间序列中的index作为end
+    end = tsla_df[tsla_df.index == sell_date].key.values[0]
+    plot_demo(just_series=True)
+    plt.fill_between(tsla_df.index, 0, tsla_df['close'], color='blue', alpha=.08)
+    # 标注股票持有周期为绿色，使用start和end切片周期
+    plt.fill_between(tsla_df.index[start:end],0,tsla_df['close'][start:end], color='green', alpha=.38)
+    # 设置y轴的显示范围，如果不设置ylim，将从0开始最为起点显示，效果不好
+    plt.ylim(np.min(tsla_df['close'])-5, np.max(tsla_df['close'])+5)
+    # 使用loc='best'
+    plt.legend(['close'], loc='best')
+    # 标注交易区间
+plot_trade('2017-07-28','2017-09-05')
