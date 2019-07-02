@@ -1654,3 +1654,6 @@ def plot_trade(buy_date,sell_date):
     plt.legend(['close'], loc='best')
     # 标注交易区间
 plot_trade('2017-07-28','2017-09-05')
+
+
+
