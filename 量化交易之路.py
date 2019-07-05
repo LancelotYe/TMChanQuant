@@ -1656,4 +1656,33 @@ def plot_trade(buy_date,sell_date):
 plot_trade('2017-07-28','2017-09-05')
 
 
+# ....
+# 5.8.1MACD指标的可视化
+# Python中计算技术指标一般通过TA-Lib提供的各种接口，如RSI只需要简单调用talib.RSI()函数，OBV需要调用talib.OBV()函数，我们只要传入对应的参数就行。
+'''
+MACD称为指数平滑异动移动平均线，是从双指数移动平均线发展而来，由快的指数移动平均线(EMA12)减去慢的指数移动平均线（EMA26）得到快线DIF，再用2*（快线DIF-DIF的9日加权移动均线DEA）得到MACD柱。
+MACD的意义和双移动平均线基本相同，即由快，慢均线的离散，聚合形态，表征当前的多空状态和股价可能的发展变化趋势，但阅读起来更方便。
+当MACD从负数转向正数时，是买入的信号，当MACD从正数转向负数时，是卖出的信号。当MACD以大角度变化时，表示快的移动平均线和慢的移动平均线的差距非常迅速地拉开，代表了一个市场大趋势的转变。
 
+
+安装ta-lib方法 
+windows：先下载安装包，然后运行Native Tools Command Prompt安装
+Move to C:\ta-lib\c\make\cdr\win32\msvc
+Build the Library nmake
+'''
+import matplotlib.pyplot as plt
+import numpy as np
+import talib
+
+kl_index = tsla_df.index
+#talib.MACD:注意参数序列必是NumPy序列，所以不能是tsla_df.close
+dif, dea, bar = talib.MACD(tsla_df.close.values, fastperiod=12, slowperiod=26, signalperiod=9)
+plt.plot(kl_index, dif, label='macd dif')
+plt.plot(kl_index, dea, label='signal dea')
+bar_red = np.where(bar > 0, bar, 0)
+bar_green = np.where(bar < 0, bar, 0)
+# 绘制bar>0的柱状图
+plt.bar(kl_index, bar_red, facecolor='red', label='hist bar')
+# 绘制bar<0的柱状图
+plt.bar(kl_index, bar_green, facecolor='green', label='hist bar')
+plt.legend(loc='best')
