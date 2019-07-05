@@ -370,9 +370,7 @@ print(unquote(url))
 
 
 # 3.1.4
-'''
-分析Robot协议
-'''
+# (1)分析Robot协议
 '''
 作用：利用urllib的robotparser模块，我们可以实现网站Robots协议的分析。
 '''
@@ -382,4 +380,122 @@ Robot协议也称作爬虫协议，机器人协议，他的协议全名叫做网
 用来告诉爬虫和搜索引擎哪些页面可以抓取，哪些不可以抓。通过robots.txt文本文件。
 当搜索爬虫访问一个站点时，它首先会检查这个站点根目录下是否存在robots.txt文件，如果存在，
 搜索爬虫会根据其中定义的爬去范围来爬去。如果没有找到这个文件，搜索爬虫便会访问所有可直接访问的页面。
+'''
+'''
+robot.txt实现对所有搜索爬虫只允许爬去public目录功能。
+User-agent描述了搜索爬虫的名称，，*代表盖协议对任何任何爬取的爬虫有效
+
+'''
+#（2）爬虫名称
+'''
+常见爬虫名称
+BaiduSpider
+Googlebot
+360Spider
+YodaoBot
+is_archiver
+Scooter
+'''
+#(3)robotparser
+'''
+了解Robots协议之后，我们就可以使用robotparser模块来解析robots.txt了。该模块提供了一个类RobotFileParser
+'''
+urllib.robotparser.RobotFileParser(url='')
+# set_url():用来设置robot.txt文件链接。如果创建RobotFileParser对象是传入了链接，那么就不需要使用这个方法设置了。
+# read():读取robot.txt文件并进行分析。
+# parse():用来解析robot.txt文件，传入的参数是robot.txt某些行的内容
+# can_fetch():该方法传入两个参数，第一个是User-agent，第二个是抓取的URL.返回的内容是该搜索引擎是否可以抓取这个URL，，返回结果True和False
+# mtime():返回的是上次抓取和分析robots.txt的时间，这对于长时间分析和抓取的搜索爬虫是很有必要的。
+# modified():它同样对长时间分析和抓取的搜索爬虫很有帮助，将当前时间设置为上次抓取和分析robot.txt的时间。
+
+from urllib.robotparser import RobotFileParser
+
+rp = RobotFileParser()
+rp.set_url('http://www.jianshu.com/robots.txt')
+rp.read()
+print(rp.can_fetch('*', 'https://www.jianshu.com/p/b67554025d7d'))
+print(rp.can_fetch('*', 'http://www.jianshu.com/serach?q=python&page=1&type=collections'))
+
+# ==
+rp = RobotFileParser('http://www.jianshu.com/robots.txt')
+
+from urllib.request import urlopen
+rp = RobotFileParser()
+rp.parse(urlopen('http://www.jianshu.com/robots.txt').read().decode('utf-8').split('\n'))
+print(rp.can_fetch('*','http://www.jianshu.com/p/b67554025d7d'))
+print(rp.can_fetch('*','http://www.jianshu.com/serach?q=python&page=1&type=collections'))
+
+
+# 3.2使用requests
+'''
+urllib使用起来有点复杂，为了方便使用requests
+'''
+# 3.2.1
+import requests
+
+r = requests.get('http://www.baidu.com')
+print(type(r))
+print(r.status_code)
+print(type(r.text))
+print(r.cookies)
+
+r = requests.post('http://httpbin.org/post')
+r = requests.put('http://httpbin.org/put')
+r = requests.delete('http://httpbin.org/delete')
+r = requests.head('http://httpbin.org/head')
+r = requests.options('http://httpbin.org/options')
+
+# GET请求
+import requests
+
+r = requests.get('http://httpbin.org/get')
+print(r.text)
+
+r = requests.get('http://httpbin.org/get?name=germey&age=22')
+
+'''
+利用params，更加人性化
+'''
+data = {
+    'name':'germy',
+    'age':22
+}
+r = requests.get('http://httpbin.org/get', params=data)
+print(r.text)
+'''
+返回的是字符串
+'''
+'''
+json()方法，是JSON格式
+'''
+import requests
+
+r = requests.get('http://httpbin.org/get')
+print(type(r.text))
+print(r.json())
+print(type(r.json()))
+
+'''
+抓取网页
+'''
+import requests
+import re
+
+headers = {
+    'User-Agent':'Mozilla/5.0(Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36(KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
+}
+r = requests.get('http://www.zhihu.com/explore', headers = headers)
+pattern = re.compile('explore-feed.*?question_link.*?>(.*?)</a>',re.S)
+title = re.findall(pattern, r.text)
+print(title)
+
+'''抓取二进制数据'''
+import requests
+r = requests.get('https://github.com/favicon.ico')
+print(r.text)
+print(r.content)
+with open('favicon.ico', 'wb') as f:
+    f.write(r.content)
+'''
+这里用了open()方法，它的第一个参数是文件名称，第二个参数代表以二进制写的形式打开，可以向文件里写入二进制数据
 '''
