@@ -280,5 +280,106 @@ from urllib.parse import urlunparse
 data = ['http', 'www.baidu.com', 'index.html', 'user', 'a=6', 'comment']
 print(urlunparse(data))
 
-# (3)urlaplit()
+# (3)urlsplit()
+'''
+这个方法和urlparse()函数非常相似
+#标识符代表网页中的一个位置
+'''
+from urllib.parse import urlsplit
+result = urlsplit('http://wwww.baidu.com/index.html;user?id=5#comment')
+print(result)
+'''
+返回的是一个SplitResult元祖类型，既可以用属性获取值，也可以用索引来获取
+'''
+from urllib.parse import urlsplit
+result = urlsplit('http://www.baidu.com/index.html;usesr?id=5#comment')
+print(result.scheme, result[0])
 
+
+# (4)urlunsplit()
+'''
+与urlunparse()类似，它也将链接各个部分组合成完整链接的方法，传入参数也是一个可迭代对象，例如列表，元祖等，
+唯一的区别是长度必须为5
+'''
+from urllib.parse import urlunsplit
+data = ['http', 'www.baidu.com', 'index.html', 'a=6', 'comment']
+print(urlunsplit(data))
+
+# (5)urljoin()
+'''
+有了urlunparse()和urlunsplit()方法，我们可以完成链接的合并，不过前提是必须要有特定长度的对象，
+链接的每一部分都要清晰分开
+'''
+from urllib.parse import urljoin
+
+print(urljoin('http://www.baidu.com','FAQ.html'))
+print(urljoin('http://www.baidu.com','http://yejunhai.com/FAQ.html'))
+print(urljoin('http://www.baidu.com/about.html','http://yejunhai.com/FAQ.html'))
+
+# (6)urlencode()
+'''
+这里我们再介绍一个常用的方法----urlencode(),它构造GET请求参数的时候非常有用
+'''
+from urllib.parse import urlencode
+params = {
+    'name':'germey',
+    'age':22
+}
+base_url = 'http://www.baidu.com'
+url = base_url + urlencode(params)
+print(url)
+
+# (7)parse_qs()
+'''
+有了序列化，必然就有反序列化。如果我们有一串GET请求参数，利用parse_qs()方法，就可以将其转化为字典
+'''
+from urllib.parse import parse_qs
+
+query = 'name=germey&age=22'
+print(parse_qs(query))
+
+# (8)parse_qsl()
+'''
+另外，还有一个parse_qsl()方法，它用于将参数转化为元祖组成的列表
+'''
+from urllib.parse import parse_qsl
+query = 'name=germey&age=22'
+print(parse_qsl(query))
+'''
+总结7，8：
+8运行结果是一个列表，而列表中的每一个元素都是一个元祖，元祖的第一个内容是参数名，第二个内容是参数值
+'''
+
+# (9)quote()
+'''
+该方法可以将内容转化为URL编码格式，URL中带有中文参数时，有时可能会导致乱码问题，
+此时用这个方法可以将中文字符转化为URL编码
+'''
+from urllib.parse import quote
+keyword = '壁纸'
+url = 'http://www.baidu.com/s?wd=' + quote(keyword)
+print(url)
+
+# (10)unquote()
+'''
+有了quote()方法，当然还有unquote()方法，它可以进行URL解码
+'''
+from urllib.parse import unquote
+url = 'https://www.baidu.com/s?wd=%E5%A3%81%E7%BA%B8'
+print(unquote(url))
+
+
+# 3.1.4
+'''
+分析Robot协议
+'''
+'''
+作用：利用urllib的robotparser模块，我们可以实现网站Robots协议的分析。
+'''
+'''
+Robot协议是啥？
+Robot协议也称作爬虫协议，机器人协议，他的协议全名叫做网络爬虫排除标准（Robots Exclusion Protocol）,
+用来告诉爬虫和搜索引擎哪些页面可以抓取，哪些不可以抓。通过robots.txt文本文件。
+当搜索爬虫访问一个站点时，它首先会检查这个站点根目录下是否存在robots.txt文件，如果存在，
+搜索爬虫会根据其中定义的爬去范围来爬去。如果没有找到这个文件，搜索爬虫便会访问所有可直接访问的页面。
+'''
