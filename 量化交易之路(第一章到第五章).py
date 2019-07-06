@@ -1706,3 +1706,4 @@ atr21 = talib.ATR(tsla_df.high.values, tsla_df.low.values, tsla_df.close.values,
 
 pd.DataFrame({'close':tsla_df.close, 'atr14':atr14, 'atr21':atr21}).plot(subplots=True, grid=True)
 
+
