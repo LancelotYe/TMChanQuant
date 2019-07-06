@@ -1686,3 +1686,23 @@ plt.bar(kl_index, bar_red, facecolor='red', label='hist bar')
 # 绘制bar<0的柱状图
 plt.bar(kl_index, bar_green, facecolor='green', label='hist bar')
 plt.legend(loc='best')
+
+
+'''
+ATR指标可视化
+Average true range平均真实波动范围，简称ATR指标。
+ATR指标主要是用来衡量市场波动强烈度，即为了显示市场变化率的指标
+TR = |最高价-最低价|，|最高价-昨收|，|昨收-最低价|中的最大值
+真实波幅（ATR）= MA(TR, N)（TR的N日的移动平均）
+常用参数N设置为14或21
+'''
+import pandas as pd
+import numpy as np
+import talib
+# 计算 atr14
+atr14 = talib.ATR(tsla_df.high.values, tsla_df.low.values, tsla_df.close.values, timeperiod=14)
+
+atr21 = talib.ATR(tsla_df.high.values, tsla_df.low.values, tsla_df.close.values, timeperiod=21)
+
+pd.DataFrame({'close':tsla_df.close, 'atr14':atr14, 'atr21':atr21}).plot(subplots=True, grid=True)
+
