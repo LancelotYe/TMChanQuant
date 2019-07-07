@@ -1,7 +1,13 @@
 '''
 算法学习
 '''
-
+# 01回文数
+'''
+'''
+n = 10
+while True:
+     x = n % 10答案
+'''
 
 
 # 03翻牌
@@ -18,8 +24,7 @@ def myTest():
 myTest()
 
 '''
-答案
-'''
+
 card = np.zeros(100)
 for i in range(2, 101):
     j = i - 1
