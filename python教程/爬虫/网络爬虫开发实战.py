@@ -499,3 +499,273 @@ with open('favicon.ico', 'wb') as f:
 '''
 这里用了open()方法，它的第一个参数是文件名称，第二个参数代表以二进制写的形式打开，可以向文件里写入二进制数据
 '''
+
+'''
+添加headers
+与urllib.request一样
+'''
+import requests
+headers = {
+    'User-Agent':'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
+}
+r = requests.get('https://www.zhihu.com/explore', headers = headers)
+print(r.text)
+
+
+'''
+POST请求
+'''
+import requests
+
+data = {'name':'germey','age':'22'}
+r = requests.post('http://httpbin.org/post', data=data)
+print(r.text)
+
+
+'''
+响应
+发送请求后，得到的自然就响应。在上面的实例中，我们使用text和content获取了响应的内容，
+还有很多其他的属性和方法来获取其他信息，比如状态码，响应头，cookies等
+'''
+
+import requests
+r = requests.get('http://www.jianshu.com')
+print(type(r.status_code), r.status_code)
+print(type(r.headers), r.headers)
+print(type(r.cookies), r.cookies)
+print(type(r.url), r.url)
+print(type(r.history), r.history)
+
+r = requests.get('http://www.jianshu.com')
+exit() if not r.status_code == requests.codes.ok else print('Request Successfully')
+
+
+'''
+3.2.2高级用法
+'''
+# (1)文件上传
+import requests
+files = {'file':open('favicon.ico', 'rb')}
+r = requests.post('http://httpbin.org/post', files = files)
+print(r.text)
+# (2)Cookies
+import requests
+r = requests.get('http://www.baidu.com')
+print(r.cookies)
+for key, value in r.cookies.items():
+    print(key+'='+value)
+
+'''
+利用Cookies来维持登录状态
+'''
+import requests
+
+headers = {
+    'Cookie':'_zap=13280478-15db-48ab-a6df-1e43e6a32c46; d_c0="AFAjl9trHA-PTln73NR7-FN7OquxByF2c-w=|1552385360"; q_c1=4e92e027c30a40ff94367488088c9dbd|1562318813000|1552385361000; r_cap_id="NWNhNTgyYmViMjE4NDM1YmE2ZTlkZGExMjhlMDE0OTc=|1562318813|fa8587fcdfc66a78d593f633de481662e94eabf3"; cap_id="OTgwN2U4ODQ3ZmYyNDg4ODljZTFiNzAwMTZjYmI4OWI=|1562318813|a1b1c7959dc5c1aa5b302022db33bb1db5e075ce"; l_cap_id="MGFiZjUzZDkyZWI3NGMyM2I1NGFkNmJjN2UzM2NkZDM=|1562318813|657bf64f4e66eeea8d6bb7e569d44665cceed4b4"; __utma=51854390.1777506407.1562318817.1562318817.1562318817.1; __utmz=51854390.1562318817.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmv=51854390.000--|3=entry_date=20190312=1; tgw_l7_route=116a747939468d99065d12a386ab1c5f; _xsrf=I6DCEkb1E3kwMITwkb5X571tMJPkfUPY; capsion_ticket="2|1:0|10:1562555527|14:capsion_ticket|44:YjI4YzdlYzA0ZTY5NDA1OWEwZTQ5ZTYyNTBmMjVhZTY=|45010a3fd03015438045c47ca5e4ede8a19f470afd4a90901a9db2263ccab5f3"; z_c0="2|1:0|10:1562555591|4:z_c0|92:Mi4xWjcwZUFnQUFBQUFBVUNPWDIyc2NEeWNBQUFDRUFsVk54MEZLWFFDejlYcFo5TmN0ZHRHRmdTZzJNenNrMWd5ZWV3|0965229dad19c5ff8069fbf0042103f9baff20a171660ff1fbfb9de074aca88b"; tst=r; unlock_ticket="ABAMh_V_vQgnAAAAhAJVTdK7Il03kUxMxObUkahwa8llHY5h8ecOZw==',
+    'Host':'www.zhihu.com',
+    'User-Agent':'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
+}
+r = requests.get('http://www.zhihu.com', headers = headers)
+print(r.text)
+
+
+# (3)会话支持
+'''
+在requests中，如果直接使用get()或者post()请求，实际上相当于不同会话，也就是两个不同浏览器打开不同页面
+如何维持会话呢？
+由此出现新对象Session
+'''
+# 以下错误
+import requests
+requests.get('http://httpbin.org/cookies/set/number/123456789')
+r = requests.get('http://httpbin.org/cookies')
+print(r.text)
+# 以下正确
+import requests
+
+s = requests.Session()
+s.get('http://httpbin.org/cookies/set/number/123456')
+r = s.get('http://httpbin.org/cookies')
+print(r.text)
+
+
+#(4)SSL证书验证
+import requests
+'''
+requests还提供了证书验证的功能。发送HTTP请求的时候，它会检查SSL证书，我们可以使用Verify参数控制是否检查此证书。
+如果不加Verify参数的话，默认是True,会自动验证。
+'''
+response = requests.get('https://www.12306.cn', verify=False)
+print(response.status_code)
+'''
+不验证的话虽然能请求成功但是会有警告
+'''
+import requests
+from requests.packages import urllib3
+
+urllib3.disable_warnings()
+response = requests.get('https://www.12306.cn', verify=False)
+print(response.status_code)
+'''或者通过捕获警告到日志的方式忽略警告'''
+
+import logging
+import requests
+logging.captureWarning(True)
+response = requests.get('https://www.12306.cn', verify=False)
+print(response.status_code)
+
+'''当然我们也可以指定本地证书用作客户端证书，这可以是单个文件（包含密钥和证书）或一个包含两个文件路径的元祖'''
+import requests
+response = requests.get('https://www.12306.cn', cert=('/path/server.crt','/path/key'))
+print(response.status_code)
+'''
+本地私有证书的key必须是解密状态
+'''
+
+#(5)代理设置
+'''
+防止封IP
+'''
+import requests
+proxies = {
+    'http':'http://10.10.1.10:3128',
+    'https':'http://10.10.1.10:1080'
+}
+requests.get("https://www.taobao.com",proxies= proxies)
+
+#(6)超时设置
+'''
+在本机网络状态不好或者服务器网络响应太慢甚至无响应时，我们可能会等待特别久的时间才能接受到响应，甚至到最后收不到响应而报错。为了防止服务器不能及时响应，应该设置一个超时时间，即超过了这个时间还没有得到响应，那就报错。
+这需要用到timeout参数。这个时间的计算是发出请求带服务器返回响应的时间。
+'''
+import requests
+r = requests.get('https://www.taobao.com', timeout=2)
+print(r.status_code)
+'''
+通过这样的方式，我们可以将超时时间设置为2秒
+上面设置的timeout将用作连接和读取二者的timeout的总和
+'''
+# 如果分别指定
+r = requests.get('https://www.taobao.com', timeout(5,30))
+'''
+如果想永久等待，可以直接将timeout设置为None，或者不设置直接留空，因为内容为None，这样永远不会返回超时错误。
+'''
+
+#（7)身份验证
+import requests
+from requests.auth import HTTPBasicAuth
+
+r = requests.get('http://localhost:5000',auth=HTTPBasicAuth('username','password'))
+print(r.status_code)
+# 可以简写如下
+r = requests.get('http://localhost:5000',auth=('username','password'))
+
+'''
+使用OAuth1验证的方法如下
+'''
+import requests
+from requests_oauthlib import OAuth1
+
+url = 'https://api.twitter.com/1.1/account/verify_credentials.json'
+auth = OAuth1('YOUR_APP_KEY', 'YOUR_APP_SECRET', 'USER_OAUTH_TOKEN', 'USER_OAUTH_TOKEN_SECRET')
+requests.get(url, auth=auth)
+
+# (8)Prepared Request
+'''前面介绍urllib时，我们可以将请求表示为数据结构，其中各个参数都可以通过一个Request对象来表示。'''
+from requests import Request, Session
+
+url = 'http://httpbin.org/post'
+data = {
+    'name':'germey'
+}
+headers = {
+    'User-Agent':'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
+}
+s = Session()
+req = Request('POST', url, data = data, headers = headers)
+prepped = s.prepare_request(req)
+r = s.send(prepped)
+print(r.text)
+'''
+我们引用了Request，然后用url，data，和headers参数构造一个Request对象，这时需要在调用Session的prepare_request()
+方法将其转换为一个prepare_request()方法将其转换为一个Prepared Request对象，然后调用send()方法发送即可
+'''
+'''
+有了Request对象，就可以将请求当作独立的对象来看待，这样在进行队列调度时会非常方便。
+'''
+
+
+'''
+3.3正则表达式
+'''
+# http://tool.oschina.net/regex/
+# (2)match()
+'''
+这里首先介绍第一个常用的匹配方法--match()，向它传入要匹配的字符串以及正则表达式，就可以检测这个正则表达式是否匹配字符串
+match()方法会尝试从字符串的起始位置匹配正则表达式，如果匹配，就返回匹配成功的结果；如果不匹配就返回None。
+'''
+import re
+
+content = 'Hello 123 4567 World_This is a Regex Demo'
+print(len(content))
+result = re.match('^Hello\s\d\d\d\s\d{4}\s\w{10}', content)
+print(result)
+print(result.group())
+print(result.span())
+
+
+'''
+匹配目标
+'''
+
+import re
+
+content = 'Hello 1234567 World_This is a Regex Demo'
+
+result = re.match('^Hello\s(\d+)\sWorld',content)
+print(result)
+print(result.group())
+print(result.group(1))
+print(result.span())
+
+'''
+通用匹配*
+'''
+import re
+content = 'Hello 123 4567 World_This is a Regex Demo'
+result = re.match('^Hello.*Demo$', content)
+print(result)
+print(result.group())
+print(result.span())
+
+'''
+贪婪与非贪婪
+使用上面的通用匹配.*时，可能有时候匹配到的并不是我们想要的结果。
+'''
+import re
+# 贪婪匹配
+'''
+贪婪匹配.*匹配了（ 123456）
+(\d)匹配了 （7）
+'''
+content = 'Hello 1234567 World_This is a Regex Demo'
+result = re.match('^He.*(\d+).*Demo$', content)
+print(result)
+print(result.group(1))
+
+# 非贪婪匹配
+'''
+贪婪匹配.*匹配了（ ）
+(\d)匹配了 （1234567）
+'''
+content = 'Hello 1234567 World_This is a Regex Demo'
+result = re.match('^He.*?(\d+).*Demo$', content)
+print(result)
+print(result.group(1))
+
+
+'''
+修饰符
+正则表达式可以包含一些
+'''
+
