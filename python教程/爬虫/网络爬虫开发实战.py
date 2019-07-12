@@ -766,6 +766,355 @@ print(result.group(1))
 
 '''
 修饰符
-正则表达式可以包含一些
+正则表达式可以包含一些可选标注修饰符控制匹配的模式。修饰符被指定为一个可选的标志。我们用实例来看一下
 '''
+import re
+content = '''Hello 1234567World_This
+ is a Regex Demo'''
+result = re.match('He.*?(\d+).*?Demo$', content, re.S)
+print(result.group(1))
 
+'''这里需要一个re.S，即可修正（.匹配除换行符以外的任意字符串，如果遇到换行符就匹配不到了）'''
+
+
+'''
+转移匹配
+.匹配除换行符以外的所有字符串，如果包含.字符怎么办
+'''
+import re
+content = '（百度）www.baidu.com'
+result = re.match('\（百度\）www\.baidu\.com',content)
+print(result.group())
+
+'''
+search()
+match()是从开头开始匹配的
+'''
+import re
+content = 'Extra stings Hello 1234567 World_This is a Regex Demo Extra stings'
+result = re.match('Hello.*?(\d+).*?Demo', content)
+print(result)
+'''
+匹配失败
+所以存在另一个方法search()
+
+'''
+result = re.search('<li.*?active.*?singer="(.*?)">(.*?)</a>', html, re.S)
+if result:
+    print(result.group(1),result.group(2))
+
+
+# (4)findall()
+# 寻找所有
+results = re.findall('<li.*?active.*?singer="(.*?)">(.*?)</a>', html, re.S)
+for result in results:
+    print(result)
+    print(type(result))
+
+# (5)sub()方法进行替换
+import re
+content = '54aK54yr5oiR54ix5L2g'
+content = re.sub('\d+', '', content)
+print(content)
+
+# 替换html
+html = re.sub('<a.*?>|</a>', '', html)
+print(html)
+results = re.findall('<li.*?>(.*?)</li>', html, re.S)
+for result in results:
+    print(result.strip())
+
+# (6)compile()
+'''
+这个方法可以将正则字符串编译成正则表达式对象，
+'''
+import re
+content1 = '2016-12-15 12:00'
+content2 = '2016-12-15 12:00'
+content3 = '2016-12-15 12:00'
+pattern = re.compile('\d{2}:\d{2}')
+result1 = re.sub(pattern, '', content1)
+result2 = re.sub(pattern, '', content2)
+result3 = re.sub(pattern, '', content3)
+print(result1, result2, result3)
+
+
+
+'''
+实例1 猫眼电影
+'''
+maoyan = 'http://maoyan.com/board/4'
+
+import requests
+from requests.exceptions import RequestException
+import time
+import re
+
+def get_one_page(url):
+    try:
+        headers = {
+            'User-Agent':'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
+        }
+        response = requests.get(url, headers = headers)
+        if response.status_code == 200:
+            return response.text
+        return None
+    except RequestException:
+        return None
+
+
+
+
+def parse_one_page(html):
+    pattern = re.compile(
+        # '<dd>.*?board-index.*?>(\d+)</i>.*?title={.*?}class.*?img alt.*?src="{.*?}".*?"star">{.*?}</p>.*?releasetime">{.*?}</p>.*?integer">{.*?}</i>.*?fraction">{.*?}</i>.*?</dd>',
+        # '<dd>.*?board-index.*?>(\d+)</i>.*?<a.*?title="(.*?)".*?<img\salt.*?src="(.*?)">.*?</a>.*?</dd>',
+        '<dd>.*?board-index.*?>(\d+)</i>.*?<a.*?title="(.*?)".*?\ssrc="(.*?)"\salt.*?<img\sdata-src="(.*?)"\salt.*?class="star">(.*?)</p>.*?</dd>',
+        # '<dd>.*?board-index.*?>(\d+)</i>.*?<a.*?title="(.*?)".*?\ssrc="(.*?)"\salt.*?<img\sdata-src="(.*?)"\salt.*?class ="star"\s>(.*?)</p>.*?class="releasetime">(.*?)</p>.*?"integer">(.*?)</i>.*?class="fraction">(.*?)</i>.*?</dd>',
+        re.S
+    )
+    items = re.findall(pattern, html)
+    for i in items:
+        yield{
+            'index':i[0],
+            'name':i[1],
+            'image':i[3],
+            'star':i[4]
+        }
+
+
+# parse_one_page(html)
+
+
+def main(offset):
+    url = 'http://maoyan.com/board/4?offset=' + str(offset)
+    html = get_one_page(url)
+    for item in parse_one_page(html):
+        print(item)
+
+def write_to_file(content):
+    with open('result.txt', 'a', encoding='utf-8') as f:
+        f.write(json.dump)
+
+for i in range(10):
+    main(i*10)
+    time.sleep(1)
+
+
+# 第四章
+# 解析库 XPath
+from lxml import etree
+text = '''
+<div>
+    <html></html>
+</div>
+'''
+html = etree.HTML(text)
+result = etree.tostring(html)
+print(result.decode('utf-8'))
+
+# 读取文本
+html = etree.parse('./test.html', etree.HTMLParser())
+result = etree.tostring(html)
+print(result.decode('utf-8'))
+
+# 5所有节点
+'''
+我们一般会用//开头的XPath规则来选取所有符合要求节点。
+如果要选取所有节点
+'''
+from lxml import etree
+html = etree.parse('./test.html', etree.HTMLParser())
+result = html.xpath('//*')
+print(result)
+
+
+
+'''
+所有节点
+'''
+url = 'http://maoyan.com/board/4'
+html = get_one_page(url)
+html = etree.HTML(html)
+r = html.xpath('//*')
+print(r)
+# (*代表匹配所有节点，也就是整个html文本中的所有节点都会被获取。)
+r2 = html.xpath('//li')
+
+'''
+子节点
+'''
+# 获取所有li节点获取直接的子节点a
+r3 = html.xpath('//li/a')
+# 获取所有li节点获取子孙节点
+r4 = html.xpath('//li//a')
+
+'''
+父节点
+..
+'''
+r5 = html.xpath('//a[@href="/films/837"]/../@class')
+# 也可以使用parent::获取父节点
+r5 = html.xpath('//a[@href="/films/837"]/parent::*/@class')
+
+'''
+属性匹配
+'''
+r6 = html.xpath('//p[@class="name"]')
+'''
+文本获取
+'''
+r7 = html.xpath('//p[@class="name"]//text()')
+'''
+属性获取
+'''
+r8 = html.xpath('//p/a/@href')
+'''
+属性多值匹配
+有时候，某些节点的某个属性可能有多个值
+'''
+from lxml import etree
+text = '''
+<li class="li li-first"><a href="link.html">first item</a></li>
+'''
+html = etree.HTML(text)
+r9 = html.xpath('//li[contains(@class, "li")]/a/text()')
+print(r9)
+
+'''
+多属性匹配
+'''
+from lxml import etree
+text = '''
+<li class="li li-first" name="item"><a href="link.html">first item</a></li>
+'''
+html = etree.HTML(text)
+r10 = html.xpath('//li[contains(@class, "li") and @name="item"]/a/text()')
+print(r10)
+
+'''
+按顺序选择
+'''
+from lxml import etree
+text = '''
+<div>
+<ul>
+<li class="item-0"><a href="link1.html">first item</a></li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-inactive"><a href="link3.html">third item</a></li>
+<li class="item-1"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+'''
+html = etree.HTML(text)
+r11 = html.xpath('//li[1]/a/text()')
+r12 = html.xpath('//li[last()]/a/text()')
+r13 = html.xpath('//li[position()<3]/a/text()')
+r14 = html.xpath('//li[last()-2]/a/text()')
+
+'''
+节点选择器
+'''
+text = '''
+<div>
+<ul>
+<li class="item-0"><span><a href="link1.html">first item</a></span></li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-inactive"><a href="link3.html">third item</a></li>
+<li class="item-1"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+'''
+html = etree.HTML(text)
+# 获取祖先节点
+r15 = html.xpath('//li[1]/ancestor::*')
+# 找到只有div的祖先节点
+r16 = html.xpath('//li[1]/ancestor::div')
+# 获取所有属性值
+r17 = html.xpath('//li[1]/attribute::*')
+# 获取所有直接子节点，并且href属性==link1.html
+r18 = html.xpath('//li[1]/child::a[@href="link1.html"]')
+# 获取所有子孙节点，并且是span
+r19 = html.xpath('//li[1]/descendant::span')
+# 可以获取当前节点之后第二个节点后所有节点
+r20 = html.xpath('//li[1]/following::*[2]')
+# 获取当前节点同级别节点
+r21 = html.xpath('//li[1]/following-sibling::*')
+
+
+# 解析库 Beautiful Soup
+from bs4 import BeautifulSoup
+soup = BeautifulSoup('<p>Hello</p>', 'lxml')
+print(soup.p.string)
+
+# 基本用法
+html= '''
+<div>
+<ul>
+<li class="item-0"><span><a href="link1.html">first item</a></span></li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-inactive"><a href="link3.html">third item</a></li>
+<li class="item-1"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+'''
+soup = BeautifulSoup(html, 'lxml')
+print(soup.prettify())
+print(soup.li.string)
+'''
+选择元素
+'''
+print(soup.ul)
+print(type(soup.ul))
+print(soup.ul.string)
+print(soup.div)
+
+
+'''
+提取信息
+'''
+# 节点名
+print(soup.li.name)
+# 属性
+print(soup.li.attrs)
+print(soup.li.attrs['class'])
+# 获取内容
+print(soup.li.string)
+
+'''
+嵌套选择
+'''
+print(soup.ul.li.string)
+'''
+关联选择
+'''
+# 子节点与子孙节点
+html = '''
+<html>
+<p class = "story">
+hahhahah
+<a href="http://www">
+<span>Elsa</span>
+</a>
+<a href="haha">Tom</a>
+and
+<a href="haha">Tom</a>
+adfadsfasdf
+</p>
+</html>
+'''
+soup = BeautifulSoup(html, 'lxml')
+print(soup.p.contents)
+# =
+print(soup.p.children)
+for i, child in enumerate(soup.p.children):
+    print(i, child)
+
+'''
+如果要得到所有子孙节点
+'''
+print(soup.p.descendants)
+for i, child in enumerate(soup.p):
