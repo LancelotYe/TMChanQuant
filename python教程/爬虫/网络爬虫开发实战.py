@@ -1106,6 +1106,9 @@ adfadsfasdf
 </p>
 </html>
 '''
+'''
+直接子节点
+'''
 soup = BeautifulSoup(html, 'lxml')
 print(soup.p.contents)
 # =
@@ -1117,4 +1120,241 @@ for i, child in enumerate(soup.p.children):
 如果要得到所有子孙节点
 '''
 print(soup.p.descendants)
-for i, child in enumerate(soup.p):
+for i, child in enumerate(soup.p.descendants):
+    print(i, child)
+
+
+'''
+父节点和祖先节点
+'''
+html = '''
+<html>
+<p class = "story">
+hahhahah
+<a href="http://www">
+<span>Elsa</span>
+</a>
+<a href="haha">Tom</a>
+and
+
+adfadsfasdf
+</p>
+<a href="haha">Tom</a>
+</html>
+'''
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, 'lxml')
+print(soup.a.parent)
+'''这里选择第一个a节点的父节点元素'''
+'''现在开始找祖先节点'''
+print(type(soup.a.parents))
+print(list(enumerate(soup.a.parents)))
+
+'''
+兄弟节点
+'''
+html = '''
+<html>
+<body>
+<p>dasdas
+<a href="sdasdas"><span>asdasd</span></a>
+<a href="sdasdas"><span>asdasd</span></a>
+<a href="sdasdas"><span>asdasd</span></a>
+</p>
+</body>
+</html>
+'''
+
+print('Next Sibing',soup.a.next_sibling)
+print('Prev Sibing',soup.a.previous_sibling)
+print('Next Sibling', list(enumerate(soup.a.next_siblings)))
+print('Prev_Sibling', list(enumerate(soup.a.previous_siblings)))
+
+'''
+提取信息
+如果想要获取他们的信息，比如文本，属性等
+'''
+print('Next Sibing:')
+print(type(soup.a.next_sibling))
+print(soup.a.next_sibling)
+print(soup.a.next_sibling.string)
+
+print('Parent:')
+print(type(soup.a.parents))
+print(list(soup.a.parents)[0])
+print(list(soup.a.parents)[0].attrs['class'])
+
+'''方法选择器'''
+# find_all(name, attr, recursive, text, **kwargs)
+html = '''
+<html>
+<div class="panel">
+<div class="panel-heading">
+<h4>Hello</h4>
+</div>
+<div class="panel-body">
+<ul class="list" id="list-1", name="elements">
+<li class="element">Foo</li>
+<li class="element">Bar</li>
+<li class="element">Jar</li>
+</ul>
+<ul class="list list-small" id="list-2">
+<li class="element">Foo</li>
+<li class="element">Bar</li>
+</ul>
+</div>
+</div>
+</html>
+'''
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, 'lxml')
+'''find_all'''
+# name
+print(soup.find_all(name="ul"))
+print(type(soup.find_all(name="ul")[0]))
+
+ul = soup.find_all(name="ul")
+for u in ul:
+    print(u.find_all(name="li"))
+
+for u in ul:
+    for l in u.find_all(name="li"):
+        print(l.string)
+
+# attrs
+print(soup.find_all(attrs={'id':'list-1'}))
+print(soup.find_all(attrs={'name':'elements'}))
+print(soup.find_all(id='list-1'))
+print(soup.find_all(class_='element'))
+# text
+'''text参数可用来匹配节点的文本，传入的形式可以是字符串，可以是正则表达式对象'''
+import re
+html = '''
+<div class="panel">
+<div class="panel-body">
+<a>Hello, this is a link</a>
+<a>Hello, this is a link, too</a>
+</div>
+</div>
+'''
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, 'lxml')
+print(soup.find_all(text=re.compile('link')))
+
+'''find'''
+# 返回单个元素，也就是后者返回的是个元素，也就是第一个匹配的元素，而前者返回的是所有匹配的元素的列表
+html = '''
+<html>
+<div class="panel">
+<div class="panel-heading">
+<h4>Hello</h4>
+</div>
+<div class="panel-body">
+<ul class="list" id="list-1", name="elements">
+<li class="element">Foo</li>
+<li class="element">Bar</li>
+<li class="element">Jar</li>
+</ul>
+<ul class="list list-small" id="list-2">
+<li class="element">Foo</li>
+<li class="element">Bar</li>
+</ul>
+</div>
+</div>
+</html>
+'''
+from bs4 import BeautifulSoup
+soup = BeautifulSoup(html, "lxml")
+print(soup.find(name='ul'))
+print(type(soup.find(name='ul')))
+print(soup.find(class_='list'))
+'''
+find_parents()和find_parent():返回祖先节点和直接父节点
+find_next_siblings()和find_next_sibling():返回后面所有的兄弟节点，返回后面第一个用地节点
+find_previous_siblings()和find_previous_sibling():返回前面所有兄弟节点，返回前面第一个兄弟节点
+find_all_next()和find_next():返回节点后所有符合条件的节点，返回第一个符合条件的节点
+fing_all_previous()和find_previous():返回节点前所有符合条件的节点，返回第一个符合条件的节点
+'''
+
+'''css选择器'''
+print(soup.select('.panel .panel-heading'))
+print(soup.select('ul li'))
+print(soup.select('#list-2 .element'))
+print(soup.select('ul')[0])
+
+'''嵌套选择'''
+# select方法同样支持嵌套选择
+for ul in soup.select('ul'):
+    print(ul.select('li'))
+
+# 获取属性
+for ul in soup.select('ul'):
+    print(ul['id'])
+    print(ul.attrs['id'])
+
+# 获取文本
+for li in soup.select('li'):
+    print('Get Text:', li.get_text())
+    print('string:', li.string)
+
+
+
+'''使用pyquery'''
+from pyquery import PyQuery as pq
+doc = pq(html)
+print(doc('li'))
+
+'''URL初始化'''
+doc = pq(url='https://cuiqingcai.com')
+print(doc('title'))
+
+import requests
+doc = pq(requests.get('https://cuiqingcai.com').text)
+print(doc('li'))
+
+doc = pq(filename='demo.html')
+print(doc('li'))
+
+'''
+基本css选择器
+'''
+html = '''
+<div id="container">
+<ul class="list">
+<li class="item-0">first item</li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-0 active"><a href="link3.html"><span>third item</span></a></li>
+<li class="item-1 active"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+'''
+doc = pq(html)
+print(doc('#container .list li'))
+print(type(doc('#container .lis li')))
+
+'''
+查找节点
+'''
+# 子节点，需要用到find()方法，此时传入的参数CSS的选择器
+doc = pq(html)
+items = doc('.list')
+print(type(items))
+lis = items.find('li')
+print(type(lis))
+print(lis)
+'''find方法的查找范围是节点的所有子节点，而如果我们只想查找子孙节点，那么可以用到children方法'''
+lis = items.children()
+print(type(lis))
+print(lis)
+'''如果要筛选所有子节点中符合条件的节点'''
+lis = items.children('.active')
+print(lis)
+
+'''父节点'''
+# 我们可以用parent()方法来获取某个节点父节点
+items = doc('.list')
+container = items.parent()
+print(type(container))
+print(container)
+
