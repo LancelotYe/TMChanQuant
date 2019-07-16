@@ -1357,4 +1357,287 @@ items = doc('.list')
 container = items.parent()
 print(type(container))
 print(container)
+'''这里的副节点是该节点的直接父节点，不会去查祖先节点'''
 
+# 祖先节点
+parents = items.parents()
+print(type(parents))
+print(parents)
+
+'''兄弟节点'''
+li = doc('.list .item-0.active')
+print(li.siblings())
+print(li.siblings('.active'))
+
+'''
+遍历
+pyquery的选择结果可能是多个节点
+'''
+li = doc('.item-0.active')
+print(li)
+print(str(li))
+
+
+lis = doc('li').items()
+print(type(lis))
+for li in lis:
+    print(li, type(li))
+
+'''获取信息'''
+'''获取属性和文本'''
+html = '''
+<div class="wrap">
+<div id="container">
+<ul class="list">
+<li class="item-0">first item</li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-0 active"><a href="link3.html"><span>third item</span></a></li>
+<li class="item-1 active"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+</div>
+'''
+from pyquery import PyQuery as pq
+doc = pq(html)
+a = doc('.item-0.active a')
+print(a, type(a))
+print(a.attr('href'))
+print(a.attr.href)
+
+a = doc('a')
+print(a, type(a))
+print(a.attr('href'))
+print(a.attr.href)
+# 调用attr只会得到第一个节点的属性
+for item in a.items():
+    print(item.attr('href'))
+
+
+'''
+获取文本
+'''
+print(a.text())
+
+li = doc('.item-0.active')
+print(li)
+print(li.html())
+'''
+调用html()方法，它返回的结果应该是li节点内的所有html文本
+'''
+li = doc('li')
+print(li.html())
+print(li.text())
+'''
+html()返回的是第一个li节点内的HTML方法，而text()返回所有li节点内部的纯文本
+'''
+
+'''
+节点操作
+'''
+# addClass和removeClass
+doc = pq(html)
+li = doc('.item-0.active')
+print(li)
+li.removeClass('active')
+print(li)
+li.addClass('active')
+print(li)
+
+'''
+attr,text,html
+'''
+html = '''
+<ul class="list">
+<li class="item-0 active">
+<a href="link3.html"><span>third item</span></a>
+</li>
+</ul>
+'''
+doc = pq(html)
+li = doc('.item-0.active')
+print(li)
+li.attr('name','link')
+print(li)
+li.text('changed item')
+print(li)
+li.html('<span>change item</span>')
+print(li)
+
+'''remove()'''
+html = '''
+<div class="wrap">
+Hello,World
+<p>This is a paragraph.</p>
+</div>
+'''
+doc = pq(html)
+wrap = doc('.wrap')
+print(wrap.text())
+# 现在只需要Hello World字符串
+wrap.find('p').remove()
+print(wrap.text())
+# 还有很多节点操作方法append(),empty(),prepend()方法。
+
+'''伪类选择器'''
+# CSS选择器之所以强大，还有一个重要原因，那就是它支持多种多样的伪类选择器，例如选择第一个节点，最后一个节点，奇偶数节点，包含某一文本的节点
+html = '''
+<div class="wrap">
+<div id="container">
+<ul class="list">
+<li class="item-0">first item</li>
+<li class="item-1"><a href="link2.html">second item</a></li>
+<li class="item-0 active"><a href="link3.html"><span>third item</span></a></li>
+<li class="item-1 active"><a href="link4.html">fourth item</a></li>
+<li class="item-0"><a href="link5.html">fifth item</a></li>
+</ul>
+</div>
+</div>
+'''
+doc = pq(html)
+li = doc('li:first-child')
+print(li)
+li = doc('li:last-child')
+print(li)
+li = doc('li:nth-child(2)')
+print(li)
+li = doc('li:gt(2)')
+print(li)
+li = doc('li:nth-child(2n)')
+print(li)
+li = doc('li:contains(second)')
+print(li)
+
+
+
+'''
+第五章 数据存储
+'''
+import requests
+from pyquery import PyQuery as pq
+
+url = 'https://www.zhihu.com/explore'
+headers = {
+    'User-Agent':'Mozilla/5.0(Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36(KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
+}
+html = requests.get(url, headers=headers).text
+doc = pq(html)
+doc = pq(url=url, headers=headers)
+
+items = doc('.explore-tab .feed-item').items()
+for item in items:
+    question = item.find('h2').text()
+    author = item.find('.author-link-line').text()
+    answer = pq(item.find('.content').html()).text()
+    file = open('explore.txt','a',encoding='utf-8')
+    file.write('\n'.join([question, author, answer]))
+    file.write('\n'+'='*50+'\n')
+    file.close()
+
+
+'''打开方式'''
+# 在刚才的实例中，open()方法的第二个参数设置成了a，这样每次写入文本时不会清空源文件，而是在文件末尾写入新的内容，
+'''
+简化写法
+'''
+with open('explore.txt','a',encoding='utf-8')as file:
+    file.write('\n'.join([question, author, answer]))
+    file.write('\n'+'='*50 + '\n')
+
+# JSON文件存储
+'''对象和数组'''
+# 对象：他在javascript中是使用花括号{}包裹起来的内容，数据结构{key1:value1,key2:value2,...}的键值对结构。
+# 数组：[]
+'''读取json'''
+import json
+str2 = '''
+{
+    "name":"Bob",
+    "gender":"male",
+    "birthday":"1992-10-18"
+}
+'''
+str = '''
+[{
+    "name":"Bob",
+    "gender":"male",
+    "birthday":"1992-10-18"
+},{
+    "name":"Selina",
+    "gender":"male",
+    "birthday":"1992-10-18"
+},{
+    "name":"孙左婧懿",
+    "gender":"female",
+    "birthday":"1996-10-18"
+}]
+'''
+print(type(str))
+data = json.loads(str)
+print(data)
+print(type(data))
+
+data[0]['name']
+data[0].get('name')
+'''读取json文件'''
+with open('data.json','r') as file:
+    str = file.read()
+    data = json.loads(str)
+    print(data)
+'''输出json'''
+data = [{
+    'name':'Bob',
+    'gender':'male'
+}]
+with open('data.json', 'w') as file:
+    file.write(json.dumps(data))
+# 缩进
+with open('data.json', 'w') as file:
+    file.write(json.dumps(data, indent=2))
+'''如果JSON中包含中文字符，中文字符会变成Unicode字符'''
+with open('data.json', 'w', encoding='utf-8') as file:
+    file.write(json.dumps(data, indent=2, ensure_ascii=False))
+
+'''CSV文件存储'''
+# 写入
+import csv
+with open('data.csv','w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['id','name','age'])
+    writer.writerow(['10001', 'Mike', '20'])
+    writer.writerow(['10001', 'Mike', '20'])
+    writer.writerow(['10001', 'Mike', '20'])
+#  传入delimiter参数,输出时以空格分割
+with open('data.csv','w') as csvfile:
+    writer = csv.writer(csvfile, delimiter=' ')
+    writer.writerow(['id','name','age'])
+    writer.writerow(['10001', 'Mike', '20'])
+    writer.writerow(['10001', 'Mike', '20'])
+    writer.writerow(['10001', 'Mike', '20'])
+# 连续传入
+with open('data.csv','w') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['id','name','age'])
+    writer.writerows(['10001', 'Mike', '20'],['10001', 'Mike', '20'],['10001', 'Mike', '20'])
+
+# 爬虫爬取的都是结构化数据，我们一般用字典来表示
+with open('data.csv', 'w') as csvfile:
+    fieldnames = ['id', 'name', 'age']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+    writer.writerow({'id': '10001', 'name': 'jjs', 'age':20})
+    writer.writerow({'id': '10001', 'name': 'mike', 'age': 20})
+    writer.writerow({'id': '10001', 'name': 'mike', 'age': 20})
+
+# 追加内容
+with open('data.csv','a') as csvfile:
+    fieldnames = ['id', 'name', 'age']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writerow({'id': '10001', 'name': 'jjs','age': 20})
+
+# 写入中文内容
+'''open()函数需要指定编码'''
+with open('data.csv','a', encoding='utf-8') as csvfile:
+    fieldnames = ['id', 'name', 'age']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writerow({'id': '10001', 'name': '阿斯顿', 'age': 20})
