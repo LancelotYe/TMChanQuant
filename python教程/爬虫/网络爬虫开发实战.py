@@ -1641,3 +1641,144 @@ with open('data.csv','a', encoding='utf-8') as csvfile:
     fieldnames = ['id', 'name', 'age']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writerow({'id': '10001', 'name': '阿斯顿', 'age': 20})
+
+'''
+读取
+'''
+import csv
+with open('data.csv', 'r', encoding='utf-8') as csvfile:
+    reader = csv.reader(csvfile)
+    for row in reader:
+        print(row)
+
+
+'''
+5.2关系型数据库存储
+关系型数据库是基于关系模型的数据库，而关系模型是通过二维表来保存的，所以它的储存方式就是行列组成的表
+MySQL
+'''
+import pymysql
+db = pymysql.connect(host="localhost",user="root",password="68466296aB",port=3306)
+cursor = db.cursor()
+cursor.execute('SELECT VERSION()')
+data = cursor.fetchone()
+print("DATABASE VERSION:", data)
+cursor.execute("CREATE DATABASE spiders DEFAULT CHARACTER SET utf8")
+db.close()
+'''
+连接成功后，需要再调用cursor()方法获得MySQL的操作游标，利用游标来执行SQL语句。这里我们执行了两句SQL，直接execute()方法执行即可。第一句SQL用于获得MySQL的当前版本，然后在调用fetchone()方法获得第一条数据，也就是得到了版本号。
+第二句语句SQL执行创建数据库的操作，数据库名叫做spiders，默认编码utf8,该语句是创建了spiders数据库。
+'''
+
+'''3创建表'''
+# 创建一次数据库，然后创建一个students数据表
+import pymysql
+db = pymysql.connect(host='localhost', user='root', password='68466296aB', port=3306, db='spiders')
+cursor = db.cursor()
+sql = 'CREATE TABLE IF NOT EXISTS students (id VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, age INT NOT NULL, PRIMARY KEY (id))'
+cursor.execute(sql)
+db.close()
+
+'''4插入数据'''
+import pymysql
+id = '20120001'
+user = 'Bob'
+age = 20
+db = pymysql.connect(host='localhost', user='root', password='68466296aB', port=3306, db='spiders')
+cursor = db.cursor()
+sql = 'INSERT INTO students(id, name, age) values(%s, %s, %s)'
+try:
+    cursor.execute(sql, (id, user, age))
+    db.commit()
+except:
+    db.rollback()
+db.close()
+'''
+需要执行db对象的commit()方法才可实现数据插入，这个方法才是真正将语句提交到数据库执行的方法。对于数据插入、更新、删除操作，都需要调用该方法执行操作。
+加一层异常处理，则调用rollback()方法执行回滚，相当于什么都没有发生过。
+'''
+data = {
+    'id':'20120001',
+    'name':'Bob',
+    'age':20
+}
+table = 'students'
+keys =  ', '.join(data.keys())
+values = ', '.join(['%s'] * len(data))
+sql = 'INSERT INTO {table}({keys}) VALUES ({values})'.format(table=table,keys=keys,values=values)
+try:
+    if cursor.execute(sql, tuple(data.values())):
+        print('Successful')
+        db.commit()
+except:
+    print('Failed')
+    db.rollback()
+db.close()
+
+'''5.更新数据'''
+sql = 'UPDATE students SET age = %s WHERE name = %s'
+try:
+    cursor.execute(sql, (25, 'Bob'))
+    db.commit()
+except:
+    db.rollback()
+db.close()
+# 智能一点
+data = {
+    'id': '20120001',
+    'name': 'Bob',
+    'age': 20
+}
+table = 'students'
+keys =  ', '.join(data.keys())
+values = ', '.join(['%s'] * len(data))
+
+sql = 'INSERT INTO {table}({keys}) VALUES ({values}) ON DUPLICATE KEY UPDATE'.format(table=table, keys=keys, values=values)
+update = ','.join(["{key}=%s".format(key=key) for key in data])
+sql += update
+try:
+    if cursor.execute(sql, tuple(data.values())*2):
+        print('Successful')
+        db.commit()
+except:
+    print('Failed')
+    db.rollback()
+db.close()
+'''
+这里构造的SQL语句其实是插入语句，但是我们在后面加了ON DUPLICATE KEY UPDATE。这行代码的意思是如果主键已经存在，就执行更新操作。
+比如，我们传入的数据id仍然为20120001,但是年龄有所变化，由20变成21,此时这条数据不会被插入，而是直接更新id为20120001的数据。
+# 构造结果是这样的：
+INSERT INTO students(id, name, age)values(%s,%s,%s) ON DUPLICATE KEY UPDATE id = %s, name= %s, age= %s
+这里变成了6 个%s。所以在后面的execute()方法的第二个参数元祖需要乘以2变成原来的两倍。
+'''
+
+
+'''6删除数据'''
+table = 'students'
+condition = 'age > 20'
+sql = 'DELETE FROM {table} WHERE {condition}'.format(table = table , condition=condition)
+try:
+    cursor.execute(sql)
+    db.commit()
+except:
+    db.rollback()
+db.close()
+'''因为删除条件有多种多样，运算符有大于小于等于like等，条件链接符AND，OR等'''
+
+
+'''7查询数据'''
+sql = 'SELECT * FROM students WHERE age >= 20'
+try:
+    cursor.execute(sql)
+    print('Count:', cursor.rowcount)
+    one = cursor.fetchone()
+    print('One:', one)
+    result = cursor.fetchall()
+    print('Results:', result)
+    print('Resukts Type:', type(results))
+    for row in results:
+        print(row)
+except:
+    print('Error')
+
+
