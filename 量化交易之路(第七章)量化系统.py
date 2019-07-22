@@ -96,3 +96,104 @@ test_kl['trend_profit'].plot(figsize=(14,7))
 test_kl[['benchmark_profit','trend_profit']].cumsum().plot(grid=True, figsize=(14,7))
 # ld = test_kl[['benchmark_profit','trend_profit']].cumsum()
 test_kl[['benchmark_profit','trend_profit']].cumsum().apply(np.exp).plot(grid=True)
+
+
+'''
+是列2：趋势跟踪策略
+《海龟交易法则》是量化经典书籍中经典作品，其中介绍过一种趋势跟踪策略，即N日趋势突破策略
+'''
+# N1：当天收盘价高于N1天内最高价格作为买入信号，认为上升趋势成立买入股票
+# N2：当天收盘价格低于N2天内最低价格作为卖出信号。认为下跌趋势成立卖出股票
+'''
+N1大于N2的原因是为了打造一个非均衡胜负收益以及非均衡胜负比例的环境
+'''
+import numpy as np
+import pandas as pd
+from abu.abupy import ABuSymbolPd
+N1 = 42
+N2 = 21
+# # method test:pd.rolling_max()
+# demo_list = np.array([1,2,1,1,100,1000])
+# # 每3个一组找出每组中的最大值
+# pd.rolling_max(demo_list, window=3)
+'''
+接下来继续使用特斯拉两年内的股票走势数据kl_pd,下面加入新的数据列nl_high,代表N1天内最高价格序列
+'''
+kl_pd = ABuSymbolPd.make_kl_df('usTSLA', n_folds=5)
+kl_pd['n1_high'] = pd.rolling_max(kl_pd['high'], window=N1)
+kl_pd[0:5]
+
+# method test:pd.expanding_max()
+# demo_list = np.array([1,2,1,1,100,1000])
+# pd.expanding_max(demo_list)
+'''
+下面利用expanding_max函数填充n1_high前N1行数据
+'''
+expan_max= pd.expanding_max(kl_pd['close'])
+# fillna()使用序列对应expan_max
+kl_pd['n1_high'].fillna(value=expan_max, inplace=True)
+
+'''下面构建N2天内最低价格卖出信号n2_low'''
+kl_pd['n2_low'] = pd.rolling_min(kl_pd['low'], window=N2)
+expan_min = pd.expanding_min(kl_pd['close'])
+kl_pd['n2_low'].fillna(value=expan_min, inplace=True)
+
+'''当天收盘价格超过N1天内的最高价突破定义来构建signal'''
+buy_index = kl_pd[(kl_pd['close']>kl_pd['n1_high'].shift(1))&(kl_pd['key']>42)].index
+kl_pd.loc[buy_index, 'signal'] = 1
+
+sell_index = kl_pd[kl_pd['close'] < kl_pd['n2_low'].shift(1)].index
+kl_pd.loc[sell_index, 'signal'] = 0
+
+# kl_pd['signal'].fillna(method='ffill', inplace=True)
+'''
+因为要得到今天收盘价才进行操作，所以需要推迟到第二天
+'''
+kl_pd['keep'] = kl_pd['signal'].shift(1)
+kl_pd['keep'].fillna(method='ffill', inplace=True)
+
+kl_pd['benchmark_profit'] = np.log(kl_pd['close']/kl_pd['close'].shift(1))
+
+kl_pd['trend_profit'] = kl_pd['keep'] * kl_pd['benchmark_profit']
+
+kl_pd[['benchmark_profit','trend_profit']].cumsum().plot(grid=True, figsize=(14,7))
+
+
+
+
+'''test案例，双高价比较'''
+
+kl_pd = ABuSymbolPd.make_kl_df('usTSLA', n_folds=6)
+
+N1 = 60
+N2 = 30
+kl_pd['n1_high'] = pd.rolling_max(kl_pd['high'], window=N1)
+expan_max= pd.expanding_max(kl_pd['close'])
+# fillna()使用序列对应expan_max
+kl_pd['n1_high'].fillna(value=expan_max, inplace=True)
+
+kl_pd['n2_high'] = pd.rolling_max(kl_pd['high'], window=N2)
+# fillna()使用序列对应expan_max
+kl_pd['n2_high'].fillna(value=expan_max, inplace=True)
+
+buy_index = kl_pd[(kl_pd['close']>kl_pd['n1_high'].shift(1))&(kl_pd['key']>N1)].index
+kl_pd.loc[buy_index, 'signal'] = 1
+
+sell_index = kl_pd[kl_pd['close'] < kl_pd['n2_high'].shift(1)].index
+kl_pd.loc[sell_index, 'signal'] = 0
+
+kl_pd['keep'] = kl_pd['signal'].shift(1)
+kl_pd['keep'].fillna(method='ffill', inplace=True)
+
+kl_pd['benchmark_profit'] = np.log(kl_pd['close']/kl_pd['close'].shift(1))
+kl_pd['trend_profit'] = kl_pd['keep'] * kl_pd['benchmark_profit']
+kl_pd[['benchmark_profit','trend_profit']].cumsum().plot(grid=True, figsize=(14,7))
+
+'''
+仓位管理
+凯里公式
+'''
+# b为赔率
+# f = (p(win) * b - p(loss))/b
+
+np.random.binomial(1,0.5)
