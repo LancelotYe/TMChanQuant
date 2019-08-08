@@ -20,8 +20,7 @@ def main():
     main_window = MainWindow(main_engine, event_engine)
     main_window.showMaximized()
 
-    qapp.
-    exec ()
+    qapp.exec()
 
 
 if __name__ == "__main__":
