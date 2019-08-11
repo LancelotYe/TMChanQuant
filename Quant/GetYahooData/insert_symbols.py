@@ -9,8 +9,11 @@ import datetime
 from math import ceil
 
 import bs4
-import MySQLdb as mdb
 import requests
+#some error MySQLdb
+import MySQLdb as mdb
+from requests.exceptions import RequestException
+
 
 
 def obtain_parse_wiki_snp500():
@@ -21,15 +24,42 @@ def obtain_parse_wiki_snp500():
     Returns a list of tuples for to add to MySQL.
     """
     # Stores the current time, for the created_at record
+
     now = datetime.datetime.utcnow()
 
-    # Use requests and BeautifulSoup to download the 
+    # Use requests and BeautifulSoup to download the
     # list of S&P500 companies and obtain the symbol table
-    response = requests.get(
-        "http://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
-    )
-    soup = bs4.BeautifulSoup(response.text)
+    try:
+        url = "http://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
+        }
+        # proxies = {
+        #     'http': 'http://10.10.1.10:3128',
+        #     'https': 'http://10.10.1.10:1080'
+        # }
+        # proxy = '124.243.226.18:8888'
 
+        # 如果代理需要验证，只需要在前面加上用户名密码，如下所示
+
+        # # proxy='username:password@176.122.177.14:14058'
+        # proxies = {
+        #     'http': 'http://' + proxy,
+        #     'https': 'https://' + proxy,
+        # }
+
+
+        response = requests.get(
+            url,
+            headers=headers,
+            # proxies=proxies
+        )
+        if response.status_code== 200:
+            print(response.text)
+        print('nothing')
+    except RequestException:
+        print('error')
+    soup = bs4.BeautifulSoup(response.text)
     # This selects the first table, using CSS Selector syntax
     # and then ignores the header row ([1:])
     symbolslist = soup.select('table')[0].select('tr')[1:]

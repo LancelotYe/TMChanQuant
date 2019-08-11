@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import pandas_datareader as pdrd
 import requests
 
 
@@ -85,7 +86,11 @@ if __name__ == "__main__":
 
     # Open up a single contract via read_csv 
     # and plot the settle price
-    es = pd.io.parsers.read_csv(
+
+    # es = pd.io.parsers.read_csv(
+    #     "%s/ESH2010.csv" % dl_dir, index_col="Date"
+    # )
+    es = pd.read_csv(
         "%s/ESH2010.csv" % dl_dir, index_col="Date"
     )
     es["Settle"].plot()
