@@ -10,6 +10,7 @@ import warnings
 
 import MySQLdb as mdb
 import requests
+import Quant.GetQuantData.ApiList as qapi
 
 
 # Obtain a database connection to the MySQL instance
@@ -49,7 +50,7 @@ def get_daily_historic_data_yahoo(
         start_date[0], end_date[1]-1, end_date[2], 
         end_date[0]
     )
-    yahoo_url = "http://ichart.finance.yahoo.com/table.csv"
+    yahoo_url = qapi.yahoo_url
     yahoo_url += "?s=%s&a=%s&b=%s&c=%s&d=%s&e=%s&f=%s"
     yahoo_url = yahoo_url % ticker_tup
 

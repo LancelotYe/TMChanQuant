@@ -13,7 +13,7 @@ import requests
 #some error MySQLdb
 import MySQLdb as mdb
 from requests.exceptions import RequestException
-
+import Quant.GetQuantData.ApiList as qapi
 
 
 def obtain_parse_wiki_snp500():
@@ -30,7 +30,8 @@ def obtain_parse_wiki_snp500():
     # Use requests and BeautifulSoup to download the
     # list of S&P500 companies and obtain the symbol table
     try:
-        url = "http://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        url = qapi.list500CompaniesInWiki
+        # url = "http://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50'
         }
