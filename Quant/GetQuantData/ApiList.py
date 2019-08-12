@@ -31,4 +31,3 @@ try:
         )
 except Exception as e:
     print("Could not download Yahoo data: %s" % e)
-
