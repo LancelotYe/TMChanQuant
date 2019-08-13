@@ -4,6 +4,7 @@ import tushare as ts
 import datetime
 import pymysql
 import sqlalchemy
+import pandas as pd
 
 
 def connect_MySQL():
@@ -15,14 +16,19 @@ def connect_MySQL():
     DB = 'DR_DataBase'
 
     symbol_id = '000001.SZ'
-    create_database(host, port, user, password)
+    create_database_table(host, port, user, password)
     df = get_1min_price(symbol_id=symbol_id, start = '20180701', end = '20180718')
+
+
+
+
+
     # mysql: // user: passwd @ 127.0.0.1 / db_name?charset = utf8
     engine = sqlalchemy.create_engine("mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8".format(user, password, host, port, DB))
     con = engine.connect()
     rush_pipe_to_db(df, con, 'test_table')
 
-def create_database(host, port, user, password):
+def create_database_table(host, port, user, password):
     connection = pymysql.connect(port=port,
                                  host=host,
                                  user=user,
@@ -34,9 +40,47 @@ def create_database(host, port, user, password):
     sqlFileName = get_sql_files()
     # execute_scripts_from_file(sqlFileName, cursor)
 
-    sql_cmd = 'CREATE DATABASE IF NOT EXISTS DR_DataBase'
+    sql_createDB_cmd = 'CREATE DATABASE IF NOT EXISTS DR_DataBase'
+    str = 'table_name'
+    sql_createTable_cmd =
+    '''
+        CREATE TABLE '{}' (
+          'id' int NOT NULL AUTO_INCREMENT,
+          'ts_code' int NOT NULL,
+          'trade_time' datetime NOT NULL,
+          'open_price' decimal(19,4) NULL,
+          'high_price' decimal(19,4) NULL,
+          'low_price' decimal(19,4) NULL,
+          'close_price' decimal(19,4) NULL,
+          'volume' bigint NULL,
+          'amount' bigint NULL,
+          'trade_date' datetime NOT NULL,
+          'pre_close_price' decimal(19,4) NULL,
+          PRIMARY KEY ('id'),
+          KEY 'index_ts_code' ('ts_code')
+        ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+    '''.format(str)
+
+    '''
+    CREATE TABLE testTB (
+          id int NOT NULL AUTO_INCREMENT,
+          ts_code int NOT NULL,
+          trade_time datetime NOT NULL,
+          open_price decimal(19,4) NULL,
+          high_price decimal(19,4) NULL,
+          low_price decimal(19,4) NULL,
+          close_price decimal(19,4) NULL,
+          volume bigint NULL,
+          amount bigint NULL,
+          trade_date datetime NOT NULL,
+          pre_close_price decimal(19,4) NULL,
+          PRIMARY KEY (id),
+          KEY index_ts_code (ts_code)
+        ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+    '''
     try:
-        cursor.execute(sql_cmd)
+        cursor.execute(sql_createDB_cmd)
+        cursor.execute(sql_createTable_cmd)
     except Exception as msg:
         print(msg)
     connection.close()
@@ -110,5 +154,44 @@ def rush_pipe_to_db(df, connection, symbol_id):
     )
 
 
-if __name__ == "__main__":
-    connect_MySQL()
+def read_from_db():
+    host = 'localhost'
+    port = 3306
+    user = 'root'
+    password = '68466296aB'
+    DB = 'DR_DataBase'
+    engine = sqlalchemy.create_engine(
+        "mysql+pymysql://{}:{}@{}:{}/{}?charset=utf8".format(user, password, host, port, DB))
+
+    with engine.connect() as con, con.begin():
+        df = pd.read_sql_table(
+            'test_table',con
+        )
+
+
+# now = datetime.datetime.now()
+#
+# if __name__ == "__main__":
+#     connect_MySQL()
+#
+#
+# from sqlalchemy.types import Integer,NVARCHAR,Float
+# from datetime import datetime
+# import pandas as pd
+#
+# def mapping_df_types(df):
+#     dtypedict = {}
+#     for i, j in zip(df.columns, df.dtypes):
+#         if "object" in str(j):
+#             dtypedict.update({i: NVARCHAR(length=255)})
+#         if "float" in str(j):
+#             dtypedict.update({i: Float(precision=2, asdecimal=True)})
+#         if "int" in str(j):
+#             dtypedict.update({i: Integer()})
+#     return dtypedict
+#
+#
+#
+# df = pd.DataFrame([['a', 1, 2.0, datetime.now(), True]],columns=['str', 'int', 'float', 'datetime', 'boolean'])
+# dtypedict = mapping_df_types(df)
+# df.to_sql(name='test', con=con, if_exists='append', index=False, dtype=dtypedict)
