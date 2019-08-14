@@ -40,7 +40,7 @@ def connect_MySQL():
               close_price decimal(19,4) NULL,
               volume bigint NULL,
               amount bigint NULL,
-              trade_date datetime NOT NULL,
+              trade_date varchar(255) NOT NULL,
               pre_close_price decimal(19,4) NULL,
               PRIMARY KEY (trade_time),
               KEY index_ts_code (ts_code)
@@ -80,7 +80,12 @@ def insertData():
     dd1 = pd.to_datetime(df['trade_date'])
     dt = pd.DatetimeIndex(df['trade_time'])
     dh = df['trade_time']
-    df = df1.apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
+    d = df1.apply(lambda x: x.strftime('%Y-%m-%d %H:%M:%S'))
+
+    a = df1.iloc[1].trade_date
+    a = df1.trade_date
+
+    b = df1['trade_date'].slice(start=0, step=4)
 
     res = zip(df['ts_code'], dh, df['open'],df['high'],df['low'],df['close'],df['vol'],df['amount'],dd1,df['pre_close'])
     sql = 'INSERT INTO {} (ts_code, trade_time, open_price, high_price, low_price, close_price, volume, amount, trade_date, pre_close_price) VALUES '.format(table_name)
