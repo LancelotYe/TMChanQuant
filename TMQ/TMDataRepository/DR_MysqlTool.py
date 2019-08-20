@@ -81,7 +81,7 @@ class dr_mysql_tool():
         except Exception as msg:
             print(msg)
             return False
-        # cursor.close()
+        cursor.close()
         return True
 
     # 获取数据库股票数据
