@@ -1,16 +1,17 @@
 import pymysql
 import pandas as pd
+from abc import ABC,abstractmethod
+import TMQ.TMDataRepository.DR_Config as drc
 
 
-
-class dr_mysql_tool():
+class MysqlTool(ABC):
     def __init__(self, conf_dict):
         self.g_connection = None
-        self.connect_mysql_db(conf_dict)
-        self.oms_columns = ['ts_code','trade_time','open','high','low','close','vol','amount','trade_date','pre_close']
+        self.connect_db(conf_dict)
 
     # 连接数据库
-    def connect_mysql_db(self, conf_dict):
+    def connect_db(self):
+        conf_dict = drc.get_mysql_config_dict()
         # 连接数据库
         host = conf_dict['host']
         port = int(conf_dict['port'])
@@ -18,11 +19,11 @@ class dr_mysql_tool():
         password = conf_dict['password']
         db_name = conf_dict['db']
         self.g_connection = pymysql.connect(port=port,
-                                       host=host,
-                                       user=user,
-                                       password=password,
-                                       # db='demo',
-                                       charset='utf8')
+                                            host=host,
+                                            user=user,
+                                            password=password,
+                                            # db='demo',
+                                            charset='utf8')
         cursor = self.g_connection.cursor()
         sql_create_db_cmd = 'CREATE DATABASE IF NOT EXISTS {};'.format(db_name)
         sql_use_db = 'USE {};'.format(db_name)
@@ -32,12 +33,53 @@ class dr_mysql_tool():
         except Exception as msg:
             print(msg)
 
+    # 断连
+    def disconnect_db(self):
+        self.g_connection.close()
+
+    #  创建表
+    @abstractmethod
+    def create_table(self, *args, **kwargs):
+        pass
+
+    # 插入数据
+    @abstractmethod
+    def insert_data(self, *args, **kwargs):
+        pass
+
+    # 获取数据
+    @abstractmethod
+    def get_data_from_db(self, *args, **kwargs):
+        pass
+
+    # 获取存在的索引
+    @abstractmethod
+    def get_exist_trade_date_index(self, *args, **kwargs):
+        pass
+
+    # 得到表名
+    @abstractmethod
+    def trans_ts_code_to_table_name(self, *args, **kwargs):
+        pass
+
+
+class OmsMysqlTool(MysqlTool):
+    def __init__(self, conf_dict):
+        super(OmsMysqlTool, self).__init__(conf_dict)
+        self.oms_columns = ['ts_code','trade_time','open','high','low','close','vol','amount','trade_date','pre_close']
+
+    # def connect_db(self):
+    #     super(OmsMysqlTool, self).connect_db()
+    #
+    # def disconnect_db(self):
+    #     super(OmsMysqlTool, self).disconnect_db()
+
     # 以下方法针对一分钟的股票数据，标记为OneMinuteStock简化为oms
     # 一分钟股票数据表格创建
-    def create_oms_table(self, ts_code):
+    def create_table(self, ts_code):
         cursor = self.g_connection.cursor()
         # # 创建Table
-        table_name = self.trans_oms_ts_code_to_table_name(ts_code)
+        table_name = self.trans_ts_code_to_table_name(ts_code)
         element = '''
                     {} varchar(255) NOT NULL,
                     {} datetime NOT NULL,
@@ -59,18 +101,14 @@ class dr_mysql_tool():
         except Exception as msg:
             print(msg)
 
-    # 插入数据
-    def insert_oms_data(self, ts_code, df):
+    def insert_data(self, ts_code, df):
         cursor = self.g_connection.cursor()
-        table_name = self.trans_oms_ts_code_to_table_name(ts_code)
+        table_name = self.trans_ts_code_to_table_name(ts_code)
         if len(df) == 0:
             print('No Data')
             return;
         df = df.fillna(999999)
-
         res = zip(*(df[a] for a in self.oms_columns))
-        # table_name = 'tes'
-        # res = zip(*[df['ts_code'], df['trade_time'], df['open'], df['high'], df['low'], df['close'], df['vol'], df['amount'], df['trade_date'], df['pre_close']])
         sql = 'INSERT IGNORE INTO {} VALUES '.format(table_name)
         for i in res:
             sql = sql + '{}'.format(i) + ','
@@ -85,7 +123,7 @@ class dr_mysql_tool():
         return True
 
     # 获取数据库股票数据
-    def get_oms_data_from_db(self, ts_code, start, end, is_asc):
+    def get_data_from_db(self, ts_code, start, end, is_asc):
         # get tick data from database
         '''
         :param cursor: 游标
@@ -96,7 +134,7 @@ class dr_mysql_tool():
         :return: 数据库股票数据
         '''
         cursor = self.g_connection.cursor()
-        table_name = self.trans_oms_ts_code_to_table_name(ts_code)
+        table_name = self.trans_ts_code_to_table_name(ts_code)
         order = 'ASC' if is_asc else 'DESC'
         select = 'SELECT * FROM {} WHERE trade_time>\'{}\' and trade_time<\'{}\' ORDER BY trade_time {};'.format(table_name, start, end, order)
         print(select)
@@ -119,9 +157,9 @@ class dr_mysql_tool():
     # 创建DB和Table
 
     # 获取数据库已存在的交易日期索引
-    def get_oms_exist_trade_date_index(self, ts_code, start, end):
+    def get_exist_trade_date_index(self, ts_code, start, end):
         cursor = self.g_connection.cursor()
-        table_name = self.trans_oms_ts_code_to_table_name(ts_code)
+        table_name = self.trans_ts_code_to_table_name(ts_code)
         select = 'SELECT DISTINCT trade_date FROM {} \
         WHERE trade_time>\'{}\' and trade_time<\'{}\' \
         ORDER BY trade_time  ASC;'.format(
@@ -135,11 +173,8 @@ class dr_mysql_tool():
             print(msg)
         return result
 
-    def disconnect_mysql(self):
-        self.g_connection.close()
-
     # 转换表名
-    def trans_oms_ts_code_to_table_name(self, ts_code):
+    def trans_ts_code_to_table_name(self, ts_code):
         # ts_code改表名
         arr = ts_code.split('.')
         if len(arr) != 2:
@@ -147,3 +182,14 @@ class dr_mysql_tool():
             return ''
         table_name = arr[1] + arr[0]
         return table_name
+
+# import TMQ.TMDataRepository.DR_TushareTool as tst
+# ts_code = '000001.SZ'
+# start_date = '20120103'
+# end_date = '20120530'
+# trade_date_df = tst.ts_get_trade_date(start_date, end_date)
+class DownloadListMysqlTool(MysqlTool):
+    def __init__(self, conf_dict):
+        super(DownloadListMysqlTool, self).__init__(conf_dict)
+        # cal_date作为索引，一份代码对应一个表
+        self.download_list_columns = ['symbol', 'exchange', 'cal_date' , 'is_open', 'has _data']
