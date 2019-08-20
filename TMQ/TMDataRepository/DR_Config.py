@@ -4,8 +4,7 @@ import os
 
 
 def get_project_dir():
-    return os.getcwd()
-    # return os.path.join(os.getcwd(),'TMQ','TMDataRepository')
+    return os.path.join(os.getcwd(),'TMQ','TMDataRepository')
 
 def get_config_path():
     return os.path.join(get_project_dir(), 'conf.ini')
