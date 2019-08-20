@@ -11,7 +11,7 @@ from TMQ.TMDataRepository.DR_MysqlTool import dr_mysql_tool
 from TMQ.Tool.TMSlider import percent
 
 # 打开数据库连接
-total_loop_num = 5
+
 
 class dr_oms_pip():
     # 一根管道通一只股票数据流
@@ -23,6 +23,7 @@ class dr_oms_pip():
         # 连接数据库
         self.ms_tool = dr_mysql_tool(conf_dict)
         self.loop_num = 0
+        self.total_loop_num = 5
         self.loop_date_list = []
         self.need_exist_df = pd.DataFrame()
 
@@ -38,7 +39,6 @@ class dr_oms_pip():
         return df
 
     def monitor_oms_data(self, ts_code, start_date, end_date):
-        global total_loop_num
         start = start_date[0:4] + '-' + start_date[4:6] + '-' + start_date[6:8]
         end = end_date[0:4] + '-' + end_date[4:6] + '-' + end_date[6:8]
         # # （非首次循环 并且 数据为空） 或者 已经没有循环次数
@@ -92,7 +92,7 @@ class dr_oms_pip():
             elif self.ms_tool.insert_oms_data(ts_code, df):
                 # 存入数据成功以后在回去鉴别数据
                 # 循环列表有数据， 并且循环次数<loop_num
-                if len(self.loop_date_list) > 0 & self.loop_num < total_loop_num+1:
+                if len(self.loop_date_list) > 0 & self.loop_num < self.total_loop_num+1:
                     self.loop_num += 1
                     return self.monitor_oms_data(ts_code, start_date, end_date)
         # 只有最后一次循环都要列出缺少的日期
