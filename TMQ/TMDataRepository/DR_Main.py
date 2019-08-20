@@ -24,7 +24,7 @@ def main_go():
     ts_code = '000001.SZ'
     start_date = '20120103'
     end_date = '20120530'
-    # df = tst.ts_get_oms_price(ts_code, start_date, end_date)
+    df = tst.ts_get_oms_price(ts_code, start_date, end_date)
     #
     # conf_dict = drc.get_mysql_config_dict()
     #
