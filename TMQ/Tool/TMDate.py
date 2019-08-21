@@ -49,3 +49,16 @@ def date_add_days(date, days):
 # end = '20180114'
 #
 # list  = clip_days_to_parts(start, end, 5)
+
+
+def get_everyday(begin_date,end_date):
+    # 前闭后闭
+    date_list = []
+    begin_date = datetime.datetime.strptime(begin_date, "%Y%m%d")
+    end_date = datetime.datetime.strptime(end_date,"%Y%m%d")
+    while begin_date <= end_date:
+        date_str = begin_date.strftime("%Y%m%d")
+        date_list.append(date_str)
+        begin_date += datetime.timedelta(days=1)
+    return date_list
+# print(getEveryDay('20160101','20170511'))

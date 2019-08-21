@@ -1,7 +1,7 @@
 import tushare as ts
 
 
-
+# 大于start日期小于end日期的价格
 def ts_get_oms_price(ts_code, start_date, end_date):
     # get tick data from tushare
     # 一次最多获取7000条数据
@@ -20,7 +20,7 @@ def ts_get_oms_price(ts_code, start_date, end_date):
         return None
     return df1
 
-
+# start到end所有交易日期
 def ts_get_trade_date(start_date, end_date):
     '''
         :param start_date: YYYYMMDD
@@ -36,3 +36,6 @@ def ts_get_trade_date(start_date, end_date):
 # start_date = '20120320'
 # end_date = '20120320'
 # df1 = ts.pro_bar(ts_code=ts_code, start_date=start_date, end_date=end_date, asset='E', freq='1min')
+
+
+

@@ -7,8 +7,9 @@ import pandas as pd
 import numpy as np
 
 import TMQ.TMDataRepository.DR_TushareTool as tst
-from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool
+from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTool
 from TMQ.Tool.TMSlider import percent
+import TMQ.Tool.TMDate as tmdt
 
 # 打开数据库连接
 
@@ -99,3 +100,37 @@ class dr_oms_pip():
         return result_df
 
 
+    def get_lost_data_from_oms_db(self, start, end, ts_code):
+        '''
+        :param start: YYYYMMDD
+        :param end: YYYYMMDD
+        :param ts_code: str
+        :return: list
+        '''
+        self.omsMysqlTool = OmsMysqlTool()
+        self.omsMysqlTool.create_table(ts_code)
+        has_data_day = self.omsMysqlTool.get_exist_trade_date_index(ts_code, start, end)
+        everyday = tmdt.get_everyday(start, end)
+        lost_day = list(set(everyday)-set(has_data_day))
+        self.omsMysqlTool.disconnect_db()
+        return lost_day
+
+    def check_lost_day_by_check_trade_date_db(self, lost_day, ts_code):
+        self.checkMysqlTool = CheckTradeDateMysqlTool()
+
+
+
+
+# pip = dr_oms_pip()
+# xx = pip.get_lost_data_from_oms_db(start, end ,ts_code)
+#
+# b= [1,2,3]
+# a = [1,2,3,4,5,6]
+# list(set(a)-set(b))
+#
+#
+# c = a.remove(b)
+#
+#
+# a = [2,4,0,8,9,10,100,0,9,7]
+# a = list(filter(100, a))
