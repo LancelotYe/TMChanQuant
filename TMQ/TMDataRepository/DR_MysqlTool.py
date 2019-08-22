@@ -61,7 +61,7 @@ class MysqlTool(ABC):
 class OmsMysqlTool(MysqlTool):
     def __init__(self):
         super(OmsMysqlTool, self).__init__()
-        self.oms_columns = ['ts_code','trade_time','open','high','low','close','vol','amount','trade_date','pre_close']
+        self.oms_columns = ['ts_code', 'trade_time', 'open', 'high', 'low', 'close','vol','amount','trade_date','pre_close']
 
     # def connect_db(self):
     #     super(OmsMysqlTool, self).connect_db()
@@ -238,7 +238,6 @@ class CheckTradeDateMysqlTool(MysqlTool):
 
     # 获取数据库股票数据
     def get_data_from_db(self, ts_code, start, end):
-        # get tick data from database
         '''
         :param cursor: 游标
         :param table_name: 表名
@@ -247,6 +246,8 @@ class CheckTradeDateMysqlTool(MysqlTool):
         :param is_asc: 排序
         :return: 数据库股票数据
         '''
+        # get tick data from database
+
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name()
         select = 'SELECT * FROM {} WHERE cal_date>=\'{}\' and cal_date<=\'{}\';'.format(table_name, start, end)
@@ -273,11 +274,10 @@ class CheckTradeDateMysqlTool(MysqlTool):
         '''
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name()
-        table_name = 'a'
-        date_list = ['a','b','c']
         date_list = ['\'{}\''.format(a) for a in date_list]
-        condaitonStr = ','.join(date_list)
-        select = 'SELECT * FROM {} WHERE cal_date in ({});'.format(table_name, condaitonStr)
+        condaiton_str = ','.join(date_list)
+        select = 'SELECT * FROM {} WHERE cal_date in ({}) and ts_code = \'{}\';'\
+            .format(table_name, condaiton_str, ts_code)
         print(select)
         df = []
         try:
@@ -287,6 +287,7 @@ class CheckTradeDateMysqlTool(MysqlTool):
         except Exception as msg:
             print(msg)
         return df
+
     # 转换表名
     def get_table_name(self):
         return 'check_trade_date'

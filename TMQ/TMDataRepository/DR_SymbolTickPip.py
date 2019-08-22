@@ -99,7 +99,7 @@ class dr_oms_pip():
         result_df = self.ms_tool.get_data_from_db(ts_code, start, end, True)
         return result_df
 
-
+    # 获取ts_code在oms数据库中，start和end期间缺少的数据
     def get_lost_data_from_oms_db(self, start, end, ts_code):
         '''
         :param start: YYYYMMDD
@@ -115,11 +115,59 @@ class dr_oms_pip():
         self.omsMysqlTool.disconnect_db()
         return lost_day
 
-    def check_lost_day_by_check_trade_date_db(self, lost_day, ts_code):
+    # 获取1.数据库没有经过验证过需要验证的日期，2.交易日期数据，3.本地check数据库存在但是需要下载的数据
+    def get_need_check_dates(self, lost_day, ts_code):
+        # 数据库缺少日期
+        check_dates = [d.strftime('%Y%m%d') for d in list(lost_day)]
+        # 获取最长时间段
+        se = tmdt.get_early_and_late_date(check_dates)
+        # 缺少的最长时间段交易日期数据
+        ts_trade_df = tst.ts_get_trade_date(se[0], se[1])
+        # # 保存交易日期数据，等验证完数据以后，需要保存到数据库
+        # self.ts_trade_df = ts_trade_df
+        # 获取check_data数据库
         self.checkMysqlTool = CheckTradeDateMysqlTool()
+        check_db_df = self.checkMysqlTool.get_data_from_db_by_date_list(ts_code, lost_day)
+        ts_trade_df_dates = list(ts_trade_df.cal_date)
+        check_db_df_dates = list(check_db_df.cal_date)
+        # need_check_dates 是checks数据库没有验证过的数据
+        self.need_check_dates = list(set(ts_trade_df_dates) - set(check_db_df_dates))
+
+        # 需要验证的时间段的基础数据在ts_trade_df中,其中包含is_opne==0的数据
+        self.basic_merge_trade_date_df = ts_trade_df[ts_trade_df['cal_date'].isin(self.need_check_dates)]
+        self.basic_merge_trade_date_df['ts_code'] = ts_code
+
+        # check_db_df中包含已经验证有数据的内容，这部分内容还有保存到oms数据库,需要添加到下载列表
+        need_download_dates = list(check_db_df[check_db_df.has_data == 1].cal_date)
+        # 本地check存在需要下载的数据
+        self.need_download_dates = need_download_dates
+        return (self.basic_merge_trade_date_df, self.need_check_dates, self.need_download_dates)
+
+    # 加下去分两步，第一步下载不需要记录到checkDB的数据，第二步下载需要记录到checkDB的数据
+    # 需要进行切片分块下载
+    # 下载数据的顺序是新数据靠前下载
+    # 下载期间用需要将need_check和need_download合并，并且排序
+    #
+    def step_repeat_download(self, need_check_dates, need_download_dates):
+        new_download_list = tmdt.sort_date_list(need_check_dates + need_download_dates)
 
 
 
+
+ts_code = '000001.SZ'
+lost_day = ['20181220','20181221','20181212','20180103']
+# test_day = ['20181220','20170101']
+import TMQ.TMDataRepository.DR_TushareTool as tst
+start = '20190101'
+end = '20190115'
+df = tst.ts_get_trade_date(start, end)
+
+tdf = df[df['cal_date'].isin(['20190103','20190105'])]
+# l = list(set(lost_day)-set(test_day))
+
+df = checkMysqlTool.get_data_from_db_by_date_list(ts_code, lost_day)
+check_dates = [d.strftime('%Y%m%d') for d in list(df.cal_date)]
+db_lost_day = list(set(lost_day)-set(check_dates))
 
 # pip = dr_oms_pip()
 # xx = pip.get_lost_data_from_oms_db(start, end ,ts_code)

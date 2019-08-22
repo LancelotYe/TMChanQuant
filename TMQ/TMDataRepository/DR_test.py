@@ -16,13 +16,16 @@ pdf.fillna(None)
 
 
 
-pdf.iloc[239]
+# pdf.iloc[239]
 
-
+tdf['ts_code'] = ts_code
+tdf['has_data'] = 0
 
 checkTradeDate = CheckTradeDateMysqlTool()
 
 checkTradeDate.insert_data(tdf)
+
+checkTradeDate.disconnect_db()
 
 
 # ['ts_code', 'exchange', 'cal_date', 'is_open', 'has_data']
