@@ -150,7 +150,7 @@ class dr_oms_pip():
     #
     def step_repeat_download(self, need_check_dates, need_download_dates):
         new_download_list = tmdt.sort_date_list(need_check_dates + need_download_dates)
-
+        block_list = tmdt.incise_date_into_block(new_download_list, 25)
 
 
 
