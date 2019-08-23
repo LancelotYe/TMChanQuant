@@ -166,22 +166,55 @@ def incise_date_into_block(date_list, max_period):
 
     return block_list
 
-    # date_list = get_everyday('20010103', '20090101')
-    date_list = ['20181220', '20181221', '20181212', '20180103', '20180104', '20180105', '20180106', '20170105', '20190506','20190505', '20010103', '20190507', '20190508', '20190509', '20190510']
+    date_list = get_everyday('20010101', '20090101')
+    # date_list = ['20181220', '20181221', '20181212', '20180103', '20180104', '20180105', '20180106', '20170105', '20190506','20190505', '20010103', '20190507', '20190508', '20190509', '20190510']
     date_list.sort(reverse=True)
     max_period = 5
     sd = [datetime.datetime.strptime(a, '%Y%m%d') for a in date_list]
     l = [[(s - datetime.timedelta(days=a)).strftime("%Y%m%d") for a in range(max_period)] for s in sd]
     date_df = pd.DataFrame(l)
     date_df = date_df[date_df.isin(date_list)]
+
+    # for row in date_df.iterrows():
+    #     print(row)
+    # df = date_df
+
+    # date_df[1:]
+    # df = date_df[range(1,max_period)].loc[0]
+    # df.loc[0]
+    # while(len(date_df)>0):
+    #     date_df.drop(index= date_df[date_df[0].isin(date_df.loc[0])].index)
+
     df = date_df
-    while(len(date_df)>0):
-        date_df.drop(index= date_df[date_df[0].isin(date_df.loc[0])].index)
+    i = [0]
+    while len(set(df.index)-set(i)) > 0:
+        # print(i[len(i)-1])
+        # print(df.index[len(i)-1])
 
-    date_df['happy'] = 1
+        index_list = df[range(1, max_period)].loc[i[-1]]
+        df = df.drop(index=df[df[0].isin(index_list)].index)
+        # print(df.index[len(i)])
+        # print(df.index[len(i)])
+        if len(df.index) != len(i):
+            i.append(df.index[len(i)])
+            # try:
+            #     i.append(df.index[len(i)])
+            # except Exception as e:
+            #     print('error')
 
-    test_df = date_df.shift(1)
-    td = date_df.T
+
+
+
+index_list = df[range(1,5)].loc[1458]
+df.drop(index=df[df[0].isin(index_list)].index)
+df.index[1499]
+df[range(1,5)].loc[1458]
+    # date_df['happy'] = 1
+    #
+    # test_df = date_df.shift(1)
+    # td = date_df.T
+
+
 
 
 
