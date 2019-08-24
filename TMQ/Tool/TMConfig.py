@@ -7,6 +7,8 @@ def get_project_dir():
     # return os.getcwd()
     return os.path.join(os.getcwd(),'TMQ','TMDataRepository')
 
+
+
 def get_config_path():
     return os.path.join(get_project_dir(), 'conf.ini')
 
@@ -25,3 +27,6 @@ def get_mysql_config_dict():
             d[key] = conf[section][key]
     return d
 
+
+def get_json_path():
+    return os.path.join(get_project_dir(), 'record.json')

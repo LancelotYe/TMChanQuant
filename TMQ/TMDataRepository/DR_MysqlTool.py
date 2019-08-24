@@ -1,7 +1,7 @@
 import pymysql
 import pandas as pd
 from abc import ABC,abstractmethod
-import TMQ.TMDataRepository.DR_Config as drc
+import TMQ.Tool.TMConfig as tmc
 
 
 class MysqlTool(ABC):
@@ -11,7 +11,7 @@ class MysqlTool(ABC):
 
     # 连接数据库
     def connect_db(self):
-        conf_dict = drc.get_mysql_config_dict()
+        conf_dict = tmc.get_mysql_config_dict()
         # 连接数据库
         host = conf_dict['host']
         port = int(conf_dict['port'])

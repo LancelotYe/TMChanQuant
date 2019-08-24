@@ -10,6 +10,7 @@ import TMQ.TMDataRepository.DR_TushareTool as tst
 from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTool
 from TMQ.Tool.TMSlider import percent
 import TMQ.Tool.TMDate as tmdt
+import TMQ.Tool.TMJson as tmjs
 
 # 打开数据库连接
 
@@ -149,8 +150,46 @@ class dr_oms_pip():
     # 下载期间用需要将need_check和need_download合并，并且排序
     #
     def step_repeat_download(self, need_check_dates, need_download_dates):
-        new_download_list = tmdt.sort_date_list(need_check_dates + need_download_dates)
-        block_list = tmdt.incise_date_into_block(new_download_list, 25)
+        # new_download_list = tmdt.sort_date_list(need_check_dates + need_download_dates)
+        new_download_list = need_check_dates + need_download_dates
+        download_task_list = tmdt.incise_date_into_block(new_download_list, 25)
+        tmjs.saveJsonInToRecord(download_task_list)
+        return download_task_list
+
+    def start_download(self, ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates):
+        need_donwload_count = len(download_task_list)
+        # tushare账号只能使用五次一分钟
+        for task in download_task_list:
+            df = tst.ts_get_oms_price(ts_code, task[0], task[1])
+            # 筛选需要保存的数据
+            need_save_df = df[df.trade_date.isin(need_check_dates+need_download_dates)]
+            self.omsMysqlTool.insert_data(ts_code, need_save_df)
+            # 保存到checkDB的数据
+            need_check_dates
+            has_date =
+            trade_date_df
+            self.checkMysqlTool.insert_data()
+
+
+    def main_go(self):
+        start = '20110103'
+        end = '20190103'
+        ts_code = '000001.SZ'
+        lost_days = self.get_lost_data_from_oms_db(ts_code, start, end)
+        task_tuple = self.get_need_check_dates(lost_days, ts_code)
+        basic_merge_trade_date_df = task_tuple[0]
+        need_check_dates = task_tuple[1]
+        need_download_dates = task_tuple[2]
+
+        download_task_list = self.step_repeat_download(need_check_dates, need_download_dates)
+
+        self.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
+
+
+
+
+
+
 
 
 
