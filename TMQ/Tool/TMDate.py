@@ -83,124 +83,25 @@ def sort_date_list(date_list):
 
 # 获取最优切割日期
 def incise_date_into_block(date_list, max_period):
-    date_list = get_everyday('20010103','20090101')
-    # date_list = ['20181220','20181221','20181212','20180103','20180104','20180105','20180106','20170105','20190506','20010103','20190507','20190508','20190509','20190510']
-    date_list.sort(reverse=True)
-    max_period = 25
-    sd = [datetime.datetime.strptime(a, '%Y%m%d') for a in date_list]
-    l = [[(s + datetime.timedelta(days=a)).strftime("%Y%m%d")for a in range(max_period)] for s in sd]
-    date_df = pd.DataFrame(l)
-    block_list = []
-    # 连续日期最大排最前
-    while(len(date_df) > 0):
-        dl_list = [set(date_df.iloc[a]) & set(date_list) for a in range(len(date_df))]
-        count_list = [len(a) for a in dl_list]
-        index = count_list.index(max(count_list))
-        collect = dl_list[index]
-        date_list = list(set(date_list)-collect)
-        collect = list(collect)
-        collect.sort(reverse=True)
-        block_list.append(collect)
-        print(len(date_list))
-        date_df = date_df[date_df[0].isin(date_list)]
-    # 越晚排越前
-    block_list.sort(reverse=True)
-
-
-
-
-    # date_list = get_everyday('20010103', '20090101')
-    date_list = ['20181220','20181221','20181212','20180103','20180104','20180105','20180106','20170105','20190506','20010103','20190507','20190508','20190509','20190510']
-    date_list.sort(reverse=True)
-    max_period = 5
-    sd = [datetime.datetime.strptime(a, '%Y%m%d') for a in date_list]
-    l = [[(s - datetime.timedelta(days=a)).strftime("%Y%m%d") for a in range(max_period)] for s in sd]
-    date_df = pd.DataFrame(l)
-    block_list = []
-    # 连续日期最大排最前
-    dl_list = [set(date_df.iloc[a]) & set(date_list) for a in range(len(date_df))]
-    dl_list.sort(key=lambda dl_list:len(dl_list), reverse=True)
-    li = dl_list.copy()
-    newl = []
-    i = 0
-    while len(li) > 0:
-        if len(newl) == 0:
-            newl.append(li[0])
-            li.remove(li[0])
-        else:
-            target = newl[-1]
-            li_cp = li.copy()
-            for a in li:
-                print(len(li))
-                if len(target & a) > 0:
-                    li_cp.remove(a)
-            li = li_cp
-            if len(li_cp) > 0:
-                newl.append(li_cp[0])
-
-
-
-
-
-
-
-
-
-
-        count_list = [len(a) for a in dl_list]
-        index = count_list.index(max(count_list))
-        collect = dl_list[index]
-        date_list = list(set(date_list) - collect)
-        collect = list(collect)
-        collect.sort(reverse=True)
-        block_list.append(collect)
-        print(len(date_list))
-        date_df = date_df[date_df[0].isin(date_list)]
-    # 越晚排越前
-    block_list.sort(reverse=True)
-
-
-
-
-
-
-    return block_list
-
-    date_list = get_everyday('20010101', '20090101')
+    date_list = get_everyday('20010101', '20190101')
     # date_list = ['20181220', '20181221', '20181212', '20180103', '20180104', '20180105', '20180106', '20170105', '20190506','20190505', '20010103', '20190507', '20190508', '20190509', '20190510']
     date_list.sort(reverse=True)
-    max_period = 5
+    max_period = 24
     sd = [datetime.datetime.strptime(a, '%Y%m%d') for a in date_list]
     l = [[(s - datetime.timedelta(days=a)).strftime("%Y%m%d") for a in range(max_period)] for s in sd]
     date_df = pd.DataFrame(l)
     date_df = date_df[date_df.isin(date_list)]
-
-    # for row in date_df.iterrows():
-    #     print(row)
-    # df = date_df
-
-    # date_df[1:]
-    # df = date_df[range(1,max_period)].loc[0]
-    # df.loc[0]
-    # while(len(date_df)>0):
-    #     date_df.drop(index= date_df[date_df[0].isin(date_df.loc[0])].index)
-
     df = date_df
-    i = [0]
-    while len(set(df.index)-set(i)) > 0:
-        # print(i[len(i)-1])
-        # print(df.index[len(i)-1])
+    # i记录每次取的索引值
+    i = []
+    while len(df.index) > len(i):
+        i.append(df.index[len(i)])
+        # 获取排名靠前日期块需要移除的所有日期列表，loc[i[-1]]代表上一次添加进记录索引的索引值
+        block_index = i[-1]
+        remove_list = df[range(1, max_period)].loc[block_index]
+        # 移除不需要的日期块
+        df = df.drop(index=df[df[0].isin(remove_list)].index)
 
-        index_list = df[range(1, max_period)].loc[i[-1]]
-        df = df.drop(index=df[df[0].isin(index_list)].index)
-        # print(df.index[len(i)])
-        # print(df.index[len(i)])
-        if len(df.index) != len(i):
-            i.append(df.index[len(i)])
-            # try:
-            #     i.append(df.index[len(i)])
-            # except Exception as e:
-            #     print('error')
 
 
 
