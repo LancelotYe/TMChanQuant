@@ -1,4 +1,5 @@
 import tushare as ts
+import TMQ.Tool.TMDate as tmd
 
 
 # 大于start日期小于end日期的价格
@@ -13,6 +14,7 @@ def ts_get_oms_price(ts_code, start_date, end_date):
     :param end_date: YYYYMMDD
     :return: df
     '''
+    end_date = tmd.date_add_days(end_date, 1)
     try:
         df1 = ts.pro_bar(ts_code=ts_code, start_date=start_date, end_date=end_date, asset='E', freq='1min')
     except Exception as msg:
@@ -39,3 +41,8 @@ def ts_get_trade_date(start_date, end_date):
 
 
 
+def login_ts_token():
+    ts.set_token('bbe62c4557d639a8fc050c17c8fb7d6ec8d8611ca94dcac42136822b')
+    # pro = ts.pro_api('bbe62c4557d639a8fc050c17c8fb7d6ec8d8611ca94dcac42136822b')
+    # df1 = ts.pro_bar(ts_code=ts_code, start_date=start, end_date=end, asset='E', freq='1min')
+    # # ts.pro_api('bbe62c4557d639a8fc050c17c8fb7d6ec8d8611ca94dcac42136822b')

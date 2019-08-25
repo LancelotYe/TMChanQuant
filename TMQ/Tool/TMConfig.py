@@ -29,4 +29,4 @@ def get_mysql_config_dict():
 
 
 def get_json_path():
-    return os.path.join(get_project_dir(), 'record.json')
+    return os.path.join(get_project_dir(), 'tasks.json')

@@ -2,21 +2,6 @@ import json
 import os
 import TMQ.Tool.TMConfig as tmc
 
-# 字典转json
-test_dict = {'bigberg': [7600, {1: [['iPhone', 6300], ['Bike', 800], ['shirt', 300]]}]}
-print(test_dict)
-print(type(test_dict))
- #dumps 将数据转换成字符串
-json_str = json.dumps(test_dict)
-print(json_str)
-print(type(json_str))
-
-# json转字典
-new_dict = json.loads(json_str)
-print(new_dict)
-print(type(new_dict))
-
-
 
 def saveJsonFile(filepath, dict):
     try:
@@ -37,20 +22,38 @@ def readJsonFile(filepath):
         print('出错啦：' + str(e))
     return load_dict
 
-def saveJsonInToRecord(dict):
-    path = tmc.get_json_path()
-    saveJsonFile(path, dict)
 
-def readJsonFromRedord():
+# tesk_dict结构
+'''
+{
+    '000001.SZ':[['20190103','20190110'],['20190103','20190110'],['20190103','20190110']],
+    '000002.SZ':[['20190103','20190110'],['20190103','20190110'],['20190103','20190110']]
+}
+'''
+def saveTasksJsonFile(ts_code, tasks_arr):
+    filepath = tmc.get_json_path()
+    if os.path.exists(filepath):
+        tasks_dic = readJsonFile(filepath)
+    tasks_dic[ts_code] = tasks_arr
+    saveJsonFile(filepath, tasks_dic)
+
+
+def readTaskJsonFile(ts_code):
     path = tmc.get_json_path()
-    dict = readJsonFile(path)
-    return
+    task_dic = readJsonFile(path)
+    tasks = task_dic[ts_code]
+    return tasks
+
+def finishTaskTellJsonFile(ts_code, task):
+    task_dic = readTaskJsonFile()
+    tasks = task_dic[ts_code]
+    tasks.remove(task)
+    task_dic[ts_code] = tasks
+    saveTasksJsonFile(ts_code, task_dic)
+
 
 # def insertJonsToFile(filepath, dict):
-
-
 # path = tmc.get_json_path()
 # saveJsonFile(path, test_dict)
 # dict = readJsonFile(path)
-#
 # dict = readJsonFile('x')

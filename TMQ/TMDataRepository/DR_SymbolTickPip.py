@@ -100,6 +100,9 @@ class dr_oms_pip():
         result_df = self.ms_tool.get_data_from_db(ts_code, start, end, True)
         return result_df
 
+
+
+
     # 获取ts_code在oms数据库中，start和end期间缺少的数据
     def get_lost_data_from_oms_db(self, start, end, ts_code):
         '''
@@ -149,26 +152,40 @@ class dr_oms_pip():
     # 下载数据的顺序是新数据靠前下载
     # 下载期间用需要将need_check和need_download合并，并且排序
     #
-    def step_repeat_download(self, need_check_dates, need_download_dates):
+    def step_repeat_download(self, ts_code, need_check_dates, need_download_dates):
         # new_download_list = tmdt.sort_date_list(need_check_dates + need_download_dates)
         new_download_list = need_check_dates + need_download_dates
         download_task_list = tmdt.incise_date_into_block(new_download_list, 25)
-        tmjs.saveJsonInToRecord(download_task_list)
+        tmjs.saveTasksJsonFile(ts_code, download_task_list)
         return download_task_list
 
     def start_download(self, ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates):
         need_donwload_count = len(download_task_list)
         # tushare账号只能使用五次一分钟
         for task in download_task_list:
+            start = task[0]
+            end = task[1]
+            # step1
             df = tst.ts_get_oms_price(ts_code, task[0], task[1])
             # 筛选需要保存的数据
             need_save_df = df[df.trade_date.isin(need_check_dates+need_download_dates)]
             self.omsMysqlTool.insert_data(ts_code, need_save_df)
+            # step2
             # 保存到checkDB的数据
-            need_check_dates
-            has_date =
-            trade_date_df
-            self.checkMysqlTool.insert_data()
+            # all_dates = tmdt.get_everyday(start, end)
+            download_data_days = need_save_df.drop_duplicates(subset='trade_date', keep='first').trade_date
+            wait_for_check_days = list(set(download_data_days)-set(need_download_dates))
+            basic_merge_trade_date_df['has_data'] = 0
+            # basic_merge_trade_date_df.cal_date.isin(wait_for_check_days)
+            basic_merge_trade_date_df.loc[basic_merge_trade_date_df.cal_date.isin(wait_for_check_days), 'has_data'] = 1
+            # 保存到数据check数据库
+            self.checkMysqlTool.insert_data(basic_merge_trade_date_df)
+            # step3
+            # json文件修改
+            tmjs.finishTaskTellJsonFile(ts_code, task)
+            # taskArr =  tmjs.readJsonFromRedord()
+            # taskArr.remove([start, end])
+            # tmjs.saveTasksJsonFile(ts_code, taskArr)
 
 
     def main_go(self):
@@ -181,7 +198,7 @@ class dr_oms_pip():
         need_check_dates = task_tuple[1]
         need_download_dates = task_tuple[2]
 
-        download_task_list = self.step_repeat_download(need_check_dates, need_download_dates)
+        download_task_list = self.step_repeat_download(ts_code, need_check_dates, need_download_dates)
 
         self.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
 
@@ -192,21 +209,21 @@ class dr_oms_pip():
 
 
 
-
-ts_code = '000001.SZ'
-lost_day = ['20181220','20181221','20181212','20180103']
-# test_day = ['20181220','20170101']
-import TMQ.TMDataRepository.DR_TushareTool as tst
-start = '20190101'
-end = '20190115'
-df = tst.ts_get_trade_date(start, end)
-
-tdf = df[df['cal_date'].isin(['20190103','20190105'])]
-# l = list(set(lost_day)-set(test_day))
-
-df = checkMysqlTool.get_data_from_db_by_date_list(ts_code, lost_day)
-check_dates = [d.strftime('%Y%m%d') for d in list(df.cal_date)]
-db_lost_day = list(set(lost_day)-set(check_dates))
+#
+# ts_code = '000001.SZ'
+# lost_day = ['20181220','20181221','20181212','20180103']
+# # test_day = ['20181220','20170101']
+# import TMQ.TMDataRepository.DR_TushareTool as tst
+# start = '20190101'
+# end = '20190115'
+# df = tst.ts_get_trade_date(start, end)
+#
+# tdf = df[df['cal_date'].isin(['20190103','20190105'])]
+# # l = list(set(lost_day)-set(test_day))
+#
+# df = checkMysqlTool.get_data_from_db_by_date_list(ts_code, lost_day)
+# check_dates = [d.strftime('%Y%m%d') for d in list(df.cal_date)]
+# db_lost_day = list(set(lost_day)-set(check_dates))
 
 # pip = dr_oms_pip()
 # xx = pip.get_lost_data_from_oms_db(start, end ,ts_code)
