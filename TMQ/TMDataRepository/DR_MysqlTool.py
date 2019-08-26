@@ -3,8 +3,9 @@ import pandas as pd
 from abc import ABC,abstractmethod
 import TMQ.Tool.TMConfig as tmc
 import TMQ.Tool.TMDate as tmd
+from TMQ.Tool.TMSingleton import Singleton
 
-
+# @Singleton
 class MysqlTool(ABC):
     def __init__(self):
         self.g_connection = None
@@ -59,7 +60,7 @@ class MysqlTool(ABC):
         pass
 
 
-class OmsMysqlTool(MysqlTool):
+class OmsMysqlTool(MysqlTool, Singleton):
     def __init__(self):
         super(OmsMysqlTool, self).__init__()
         self.oms_columns = ['ts_code', 'trade_time', 'open', 'high', 'low', 'close','vol','amount','trade_date','pre_close']
@@ -192,7 +193,7 @@ class OmsMysqlTool(MysqlTool):
 # end_date = '20120530'
 # trade_date_df = tst.ts_get_trade_date(start_date, end_date)
 # 入库的数据都是检查过的数据
-class CheckTradeDateMysqlTool(MysqlTool):
+class CheckTradeDateMysqlTool(MysqlTool, Singleton):
     def __init__(self):
         super(CheckTradeDateMysqlTool, self).__init__()
         # cal_date作为索引，一份代码对应一个表

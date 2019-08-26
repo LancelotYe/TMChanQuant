@@ -51,8 +51,14 @@ def main_go():
     start_date = '20120103'
     end_date = '20120206'
     # result_df = mysqltool.get_oms_data_from_db(ts_code, start, end, True)
-    from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool
+    from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool, CheckTradeDateMysqlTool
     mysqlT = OmsMysqlTool()
+    m = OmsMysqlTool()
+
+    t = CheckTradeDateMysqlTool()
+    c = CheckTradeDateMysqlTool()
+    print(mysqlT, m, t, c)
+
     df = mysqlT.get_data_from_db(ts_code, start_date, end_date, True)
     tdf = mysqlT.get_exist_trade_date_index(ts_code, start_date, end_date)
 
