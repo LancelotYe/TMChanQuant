@@ -1,5 +1,5 @@
-import TMQ.TMDataRepository.DR_SymbolTickPip as symbolPip
-# from TMQ.TMDataRepository.DR_MysqlTool import dr_mysql_tool
+
+
 # import TMQ.TMDataRepository.DR_Config as drc
 # import TMQ.TMDataRepository.DR_TushareTool as tst
 
@@ -21,10 +21,8 @@ import TMQ.TMDataRepository.DR_SymbolTickPip as symbolPip
 # df.to_csv(path)
 
 def main_go():
-    ts_code = '000001.SZ'
-    start_date = '20120103'
-    end_date = '20120530'
-    df = tst.ts_get_oms_price(ts_code, start_date, end_date)
+
+    # df = tst.ts_get_oms_price(ts_code, start_date, end_date)
     #
     # conf_dict = drc.get_mysql_config_dict()
     #
@@ -49,15 +47,37 @@ def main_go():
 
 
     # result = trdf
-
+    ts_code = '000001.SZ'
+    start_date = '20120103'
+    end_date = '20120206'
     # result_df = mysqltool.get_oms_data_from_db(ts_code, start, end, True)
+    from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool
+    mysqlT = OmsMysqlTool()
+    df = mysqlT.get_data_from_db(ts_code, start_date, end_date, True)
+    tdf = mysqlT.get_exist_trade_date_index(ts_code, start_date, end_date)
 
 
+    import TMQ.TMDataRepository.DR_SymbolTickPip as symbolPip
     dr_pip = symbolPip.dr_oms_pip()
-
     df = dr_pip.pip_start(ts_code, start_date,end_date)
     return df
     print(df)
+
+    from TMQ.TMDataRepository.DR_Pip import Pip
+    p = Pip()
+    lost_day = p.get_lost_data_from_oms_db(start_date, end_date, ts_code)
+    a,b,c = p.check_trade_dates(lost_day, ts_code)
+    download_task_list = p.step_repeat_download(ts_code, b, c)
+
+
+
+
+    from TMQ.TMDataRepository.DR_MysqlTool import CheckTradeDateMysqlTool
+    checkMysqlTool = CheckTradeDateMysqlTool()
+    check_db_df = checkMysqlTool.get_data_from_db_by_date_list(ts_code, lost_day)
+
+
+
 
 
 if __name__ == "__main__":

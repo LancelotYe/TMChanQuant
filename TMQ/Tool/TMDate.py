@@ -71,7 +71,7 @@ def get_early_and_late_date(date_list):
     date_list = [datetime.datetime.strptime(d, '%Y%m%d') for d in date_list]
     big_d = max(date_list).strftime('%Y%m%d')
     small_d = min(date_list).strftime('%Y%m%d')
-    return [small_d, big_d]
+    return small_d, big_d
 
 
 # # 将日期数据进行排序

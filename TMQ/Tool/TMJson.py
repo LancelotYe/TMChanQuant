@@ -32,6 +32,7 @@ def readJsonFile(filepath):
 '''
 def saveTasksJsonFile(ts_code, tasks_arr):
     filepath = tmc.get_json_path()
+    tasks_dic = {}
     if os.path.exists(filepath):
         tasks_dic = readJsonFile(filepath)
     tasks_dic[ts_code] = tasks_arr

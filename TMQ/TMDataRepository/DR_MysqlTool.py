@@ -2,6 +2,7 @@ import pymysql
 import pandas as pd
 from abc import ABC,abstractmethod
 import TMQ.Tool.TMConfig as tmc
+import TMQ.Tool.TMDate as tmd
 
 
 class MysqlTool(ABC):
@@ -101,7 +102,7 @@ class OmsMysqlTool(MysqlTool):
         if len(df) == 0:
             print('No Data')
             return;
-        df = df.fillna(None)
+        df = df.fillna(999999)
         res = zip(*(df[a] for a in self.oms_columns))
         sql = 'INSERT IGNORE INTO {} VALUES '.format(table_name)
         for i in res:
@@ -119,6 +120,8 @@ class OmsMysqlTool(MysqlTool):
 
     # 获取数据库股票数据
     def get_data_from_db(self, ts_code, start, end, is_asc):
+        start = start[0:4] + '-' + start[4:6] + '-' + start[6:8]
+        end = end[0:4] + '-' + end[4:6] + '-' + end[6:8]
         # get tick data from database
         '''
         :param cursor: 游标
@@ -131,6 +134,7 @@ class OmsMysqlTool(MysqlTool):
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name(ts_code)
         order = 'ASC' if is_asc else 'DESC'
+        # end = tmd.date_add_days(end, 1)
         select = 'SELECT * FROM {} WHERE trade_time>\'{}\' and trade_time<\'{}\' ORDER BY trade_time {};'.format(table_name, start, end, order)
         print(select)
         df = []
@@ -163,13 +167,16 @@ class OmsMysqlTool(MysqlTool):
 
     # 获取数据库已存在的交易日期索引
     def get_exist_trade_date_index(self, ts_code, start, end):
+        start = start[0:4] + '-' + start[4:6] + '-' + start[6:8]
+        end = end[0:4] + '-' + end[4:6] + '-' + end[6:8]
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name(ts_code)
         select = 'SELECT DISTINCT trade_date FROM {} \
         WHERE trade_time>\'{}\' and trade_time<\'{}\' \
-        ORDER BY trade_time  ASC;'.format(
+        ORDER BY trade_date ASC;'.format(
             table_name, start, end)
         result = []
+        print(select)
         try:
             cursor.execute(select)
             # result = pd.DataFrame(list(cursor.fetchall()))
