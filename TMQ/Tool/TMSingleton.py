@@ -1,4 +1,6 @@
 import threading
+
+
 class Singleton(object):
     _instance_lock = threading.Lock()
 
@@ -10,7 +12,9 @@ class Singleton(object):
                 if not hasattr(Singleton, "_instance"):
                     Singleton._instance = object.__new__(cls)
         return Singleton._instance
-#
+
+
+
 # obj1 = Singleton()
 # obj2 = Singleton()
 # print(obj1,obj2)
@@ -71,3 +75,11 @@ class Singleton(object):
 # a1 = A(2)
 # a2 = A(3)
 # print(a1,a2)
+
+def SingletonCls(cls, class_name):
+    if not hasattr(class_name, "_instance"):
+        with class_name._instance_lock:
+            if not hasattr(class_name, "_instance"):
+                class_name._instance = object.__new__(cls)
+
+    return class_name._instance

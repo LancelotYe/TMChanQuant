@@ -3,13 +3,21 @@ import pandas as pd
 from abc import ABC,abstractmethod
 import TMQ.Tool.TMConfig as tmc
 import TMQ.Tool.TMDate as tmd
-from TMQ.Tool.TMSingleton import Singleton
+import threading
+from TMQ.Tool.TMSingleton import SingletonCls
 
-# @Singleton
 class MysqlTool(ABC):
     def __init__(self):
         self.g_connection = None
         self.connect_db()
+
+    # _instance_lock = threading.Lock()
+    # def __new__(cls, *args, **kwargs):
+    #     if not hasattr(CheckTradeDateMysqlTool, "_instance"):
+    #         with CheckTradeDateMysqlTool._instance_lock:
+    #             if not hasattr(CheckTradeDateMysqlTool, "_instance"):
+    #                 CheckTradeDateMysqlTool._instance = object.__new__(cls)
+    #     return CheckTradeDateMysqlTool._instance
 
     # 连接数据库
     def connect_db(self):
@@ -60,16 +68,19 @@ class MysqlTool(ABC):
         pass
 
 
-class OmsMysqlTool(MysqlTool, Singleton):
+class OmsMysqlTool(MysqlTool):
     def __init__(self):
         super(OmsMysqlTool, self).__init__()
         self.oms_columns = ['ts_code', 'trade_time', 'open', 'high', 'low', 'close','vol','amount','trade_date','pre_close']
 
-    # def connect_db(self):
-    #     super(OmsMysqlTool, self).connect_db()
-    #
-    # def disconnect_db(self):
-    #     super(OmsMysqlTool, self).disconnect_db()
+    _instance_lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(OmsMysqlTool, "_instance"):
+            with OmsMysqlTool._instance_lock:
+                if not hasattr(OmsMysqlTool, "_instance"):
+                    OmsMysqlTool._instance = object.__new__(cls)
+        return OmsMysqlTool._instance
 
     # 以下方法针对一分钟的股票数据，标记为OneMinuteStock简化为oms
     # 一分钟股票数据表格创建
@@ -193,13 +204,23 @@ class OmsMysqlTool(MysqlTool, Singleton):
 # end_date = '20120530'
 # trade_date_df = tst.ts_get_trade_date(start_date, end_date)
 # 入库的数据都是检查过的数据
-class CheckTradeDateMysqlTool(MysqlTool, Singleton):
+
+class CheckTradeDateMysqlTool(MysqlTool):
     def __init__(self):
         super(CheckTradeDateMysqlTool, self).__init__()
         # cal_date作为索引，一份代码对应一个表
         # has_data的意思是
         self.trade_has_data_columns = ['ts_code', 'exchange', 'cal_date', 'is_open', 'has_data']
         self.create_table()
+
+    _instance_lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(CheckTradeDateMysqlTool, "_instance"):
+            with CheckTradeDateMysqlTool._instance_lock:
+                if not hasattr(CheckTradeDateMysqlTool, "_instance"):
+                    CheckTradeDateMysqlTool._instance = object.__new__(cls)
+        return CheckTradeDateMysqlTool._instance
 
     def create_table(self):
         cursor = self.g_connection.cursor()
