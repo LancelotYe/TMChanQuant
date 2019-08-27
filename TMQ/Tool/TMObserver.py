@@ -1,3 +1,5 @@
+import threading
+# 消息发布
 class Publisher:
     def __init__(self, *args, **kwargs):
         pass
@@ -11,13 +13,22 @@ class Publisher:
     def notifyAll(self, *args, **kwargs):
         pass
 
+# 通知中心（单利）
+class NotificationCenter(Publisher):
+    _instance_lock = threading.Lock()
 
-class TechForum(Publisher):
     def __init__(self):
-        super(TechForum, self).__init__()
+        super(NotificationCenter, self).__init__()
         self._listOfUsers = []
-        self.postname = None
-        
+        self.notifiation = None
+
+    def __new__(cls, *args, **kwargs):
+        if not hasattr(NotificationCenter, "_instance"):
+            with NotificationCenter._instance_lock:
+                if not hasattr(NotificationCenter, "_instance"):
+                    NotificationCenter._instance = object.__new__(cls)
+        return NotificationCenter._instance
+
     def register(self, userObj):
         if userObj not in self._listOfUsers:
             self._listOfUsers.append(userObj)
@@ -27,56 +38,57 @@ class TechForum(Publisher):
 
     def notifyAll(self):
         for objects in self._listOfUsers:
-            objects.notify(self.postname)
+            objects.notify(self.notifiation)
 
-    def writeNewPost(self , postname):
-        self.postname = postname
+    def postNotification(self, notifiation):
+        self.notifiation = notifiation
         self.notifyAll()
 
 
-class Subscriber:
+# 接受者
+class Receiver:
     def __init__(self, *args, **kwargs):
         pass
 
     def notify(self, *args, **kwargs):
         pass
 
-
-class User1(Subscriber):
-    def notify(self, postname):
-        print("User1 notified of a new post %s" % postname)
-
-
-class User2(Subscriber):
-    def notify(self, postname):
-        print("User2 notified of a new post %s" % postname)
-
-
-class SisterSites(Subscriber):
-    def __init__(self):
-        super(SisterSites, self).__init__()
-        self._sisterWebsites = ["Site1" , "Site2", "Site3"]
-
-    def notify(self, postname):
-        for site in self._sisterWebsites:
-                print("Send nofication to site:%s " % site)
-
-
-
-if __name__ == "__main__":
-    techForum = TechForum()
-
-    user1 = User1()
-    user2 = User2()
-    sites = SisterSites()
-
-    techForum.register(user1)
-    techForum.register(user2)
-    techForum.register(sites)
+# 通知
+# class Notification(Receiver):
+#     def notify(self, notifiation):
+#         pass
+#
+#
+# class User2(Receiver):
+#     def notify(self, notifiation):
+#         print("User2 notified of a new post %s" % notifiation)
+#
+#
+# class SisterSites(Receiver):
+#     def __init__(self):
+#         super(SisterSites, self).__init__()
+#         self._sisterWebsites = ["Site1" , "Site2", "Site3"]
+#
+#     def notify(self, postname):
+#         for site in self._sisterWebsites:
+#                 print("Send nofication to site:%s " % site)
 
 
-    techForum.writeNewPost("Observe Pattern in Python")
-
-    techForum.unregister(sites)
-
-    techForum.writeNewPost("MVC Pattern in Python")
+#
+# if __name__ == "__main__":
+#     notificationCenter = NotificationCenter()
+#
+#     user1 = User1()
+#     user2 = User2()
+#     sites = SisterSites()
+#
+#     notificationCenter.register(user1)
+#     notificationCenter.register(user2)
+#     notificationCenter.register(sites)
+#
+#
+#     notificationCenter.writeNewPost("Observe Pattern in Python")
+#
+#     notificationCenter.unregister(sites)
+#
+#     notificationCenter.writeNewPost("MVC Pattern in Python")

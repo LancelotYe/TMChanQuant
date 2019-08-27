@@ -6,23 +6,35 @@ from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTo
 from TMQ.Tool.TMSlider import percent
 import TMQ.Tool.TMDate as tmdt
 import TMQ.Tool.TMJson as tmjs
-import TMQ.Tool.TMObserver as tmob
+from TMQ.Tool.TMObserver import NotificationCenter, Receiver
+from enum import Enum
+
+class taskType(Enum):
+    goto_get_download_list = 1,
+    finish_get_download_list = 2,
+    goto_download = 3,
+
+
+
 
 
 def main_go():
     start = '20110103'
     end = '20190103'
     ts_code = '000001.SZ'
-    pip = Pip()
+    pip = PiperTask()
     lost_days = pip.get_lost_data_from_oms_db(ts_code, start, end)
     basic_merge_trade_date_df, need_check_dates, need_download_dates= pip.check_trade_dates(lost_days, ts_code)
 
-    download_task_list = pip.step_repeat_download(ts_code, need_check_dates, need_download_dates)
-    pip.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
+    download_task_list = pip.get_download_task_list(ts_code, need_check_dates, need_download_dates)
+
+    p = Piper()
+    p.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
 
 
-class Pip():
+class Piper(Receiver):
     def __init__(self):
+        super(Piper, self).__init__()
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
@@ -33,7 +45,8 @@ class Pip():
         # self.loop_date_list = []
         # self.need_exist_df = pd.DataFrame()
 
-
+    def notify(self, notifiation):
+        print(notifiation)
 
 
 
@@ -69,8 +82,9 @@ class Pip():
 
 
 
-class PipTask():
+class PiperTask(Receiver):
     def __init__(self, start, end, ts_code):
+        super(PiperTask, self).__init__()
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
@@ -79,6 +93,9 @@ class PipTask():
         lost_day = self.get_lost_data_from_oms_db(start, end, ts_code)
         a,b,c = self.check_trade_dates(lost_day, ts_code)
         get_download_task_list = self.get_download_task_list(ts_code, b, c)
+
+    def notify(self, notification):
+        print(notification)
 
     # 获取ts_code在oms数据库中，start和end期间缺少的数据
     def get_lost_data_from_oms_db(self, start, end, ts_code):
@@ -139,23 +156,15 @@ class PipTask():
         return download_task_list
 
 
-class PipControl(tmob.Publisher):
-    def __init__(self):
-        super(PipControl, self).__init__()
-        self._listOfUsers = []
-        self.postname = None
+def controlCenter():
+    start = '20180103'
+    end = '20180403'
+    ts_code = '000001.SZ'
+    NotificationCenter()
+    pip =Piper()
+    NotificationCenter().register(pip)
+    pipTask = PiperTask(start, end, ts_code)
 
-    def register(self, userObj):
-        if userObj not in self._listOfUsers:
-            self._listOfUsers.append(userObj)
+    NotificationCenter().register(pipTask)
 
-    def unregister(self, userObj):
-        self._listOfUsers.remove(userObj)
-
-    def notifyAll(self):
-        for objects in self._listOfUsers:
-            objects.notify(self.postname)
-
-    def writeNewPost(self , postname):
-        self.postname = postname
-        self.notifyAll()
+    NotificationCenter().postNotification('')
