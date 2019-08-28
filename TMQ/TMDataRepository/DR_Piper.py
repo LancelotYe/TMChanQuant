@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-import TMQ.TMDataRepository.DR_TushareTool as tst
+from TMQ.TMDataRepository.DR_TushareTool import TsTool
 from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTool
 from TMQ.Tool.TMSlider import percent
 import TMQ.Tool.TMDate as tmdt
@@ -32,9 +32,8 @@ def main_go():
     p.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
 
 
-class Piper(Receiver):
+class Piper():
     def __init__(self):
-        super(Piper, self).__init__()
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
@@ -44,12 +43,6 @@ class Piper(Receiver):
         # self.total_loop_num = 5
         # self.loop_date_list = []
         # self.need_exist_df = pd.DataFrame()
-
-    def notify(self, notifiation):
-        print(notifiation)
-
-
-
 
 
     def start_download(self, ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates):
@@ -62,7 +55,7 @@ class Piper(Receiver):
             start = task[0]
             end = task[1]
             # step1
-            df = tst.ts_get_oms_price(ts_code, start, end)
+            df = TsTool().ts_get_oms_price(ts_code, start, end)
             # 筛选需要保存的数据
             need_save_df = df[df.trade_date.isin(need_check_dates+need_download_dates)]
             self.omsMysqlTool.insert_data(ts_code, need_save_df)
@@ -82,9 +75,8 @@ class Piper(Receiver):
 
 
 
-class PiperTask(Receiver):
+class PiperTask():
     def __init__(self, start, end, ts_code):
-        super(PiperTask, self).__init__()
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
@@ -92,10 +84,9 @@ class PiperTask(Receiver):
         # self.checkMysqlTool = None
         lost_day = self.get_lost_data_from_oms_db(start, end, ts_code)
         a,b,c = self.check_trade_dates(lost_day, ts_code)
-        get_download_task_list = self.get_download_task_list(ts_code, b, c)
+        self.get_download_task_list = self.get_download_task_list(ts_code, b, c)
 
-    def notify(self, notification):
-        print(notification)
+
 
     # 获取ts_code在oms数据库中，start和end期间缺少的数据
     def get_lost_data_from_oms_db(self, start, end, ts_code):
@@ -121,7 +112,7 @@ class PiperTask(Receiver):
         # 获取最长时间段
         start, end = tmdt.get_early_and_late_date(check_dates)
         # 缺少的最长时间段交易日期数据
-        ts_trade_df = tst.ts_get_trade_date(start, end)
+        ts_trade_df = TsTool().ts_get_trade_date(start, end)
         # # 保存交易日期数据，等验证完数据以后，需要保存到数据库
         # self.ts_trade_df = ts_trade_df
         # 获取check_data数据库
@@ -156,7 +147,35 @@ class PiperTask(Receiver):
         return download_task_list
 
 
+
+
+class PipControl(Receiver):
+
+    def __init__(self):
+        super(PipControl, self).__init__()
+        # self.table_name = ''
+        # 创建数据库连接工具对象
+        # 连接数据库
+        NotificationCenter().register(self)
+
+
+
+    def notify(self, notifiation):
+        print(notifiation)
+
+
+
+    def sendTask(self, start, end, ts_code):
+        pipTask = PiperTask(start, end, ts_code)
+
+
+    def clear(self):
+        NotificationCenter.unregister(self)
+
+
 def controlCenter():
+
+
     start = '20180103'
     end = '20180403'
     ts_code = '000001.SZ'

@@ -69,7 +69,7 @@ def main_go():
     return df
     print(df)
 
-    from TMQ.TMDataRepository.DR_Pip import Pip
+    from TMQ.TMDataRepository.DR_Piper import Pip
     p = Pip()
     lost_day = p.get_lost_data_from_oms_db(start_date, end_date, ts_code)
     a,b,c = p.check_trade_dates(lost_day, ts_code)

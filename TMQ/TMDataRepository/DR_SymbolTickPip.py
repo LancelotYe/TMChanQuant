@@ -6,7 +6,7 @@
 import pandas as pd
 import numpy as np
 
-import TMQ.TMDataRepository.DR_TushareTool as tst
+from TMQ.TMDataRepository.DR_TushareTool import TsTool
 from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTool
 from TMQ.Tool.TMSlider import percent
 import TMQ.Tool.TMDate as tmdt
@@ -45,7 +45,7 @@ class dr_oms_pip():
         exist_trade_date_index = self.ms_tool.get_exist_trade_date_index(ts_code, start_date, end_date)
         # 然后从tushare获取交易日开盘的交易日期
         if len(self.need_exist_df) == 0:
-            trade_date_index_df = tst.ts_get_trade_date(start_date, end_date)
+            trade_date_index_df = TsTool().ts_get_trade_date(start_date, end_date)
             # 清理未开盘的数据
             self.need_exist_df = trade_date_index_df[trade_date_index_df.is_open == 1]
             self.need_exist_df = trade_date_index_df
@@ -76,7 +76,7 @@ class dr_oms_pip():
             #     # 拿倒数第15个交易日
             #     new_start = self.loop_date_list[-15]
             new_end = self.loop_date_list[-1]
-            df = tst.ts_get_oms_price(ts_code, new_start, new_end)
+            df = TsTool().ts_get_oms_price(ts_code, new_start, new_end)
             if len(df) > 0:
                 # 获取的df是从大到小排的
                 cut_start_date = df.iloc[len(df) - 1].trade_date
@@ -124,7 +124,7 @@ class dr_oms_pip():
         # 获取最长时间段
         se = tmdt.get_early_and_late_date(check_dates)
         # 缺少的最长时间段交易日期数据
-        ts_trade_df = tst.ts_get_trade_date(se[0], se[1])
+        ts_trade_df = TsTool().ts_get_trade_date(se[0], se[1])
         # # 保存交易日期数据，等验证完数据以后，需要保存到数据库
         # self.ts_trade_df = ts_trade_df
         # 获取check_data数据库
@@ -164,7 +164,7 @@ class dr_oms_pip():
             start = task[0]
             end = task[1]
             # step1
-            df = tst.ts_get_oms_price(ts_code, start, end)
+            df = TsTool().ts_get_oms_price(ts_code, start, end)
             # 筛选需要保存的数据
             need_save_df = df[df.trade_date.isin(need_check_dates+need_download_dates)]
             self.omsMysqlTool.insert_data(ts_code, need_save_df)
