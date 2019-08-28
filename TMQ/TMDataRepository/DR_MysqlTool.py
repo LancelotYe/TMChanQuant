@@ -3,6 +3,7 @@ import pandas as pd
 from abc import ABC,abstractmethod
 import TMQ.Tool.TMConfig as tmc
 import TMQ.Tool.TMDate as tmd
+from TMQ.Tool.TMConfig import tm_print
 import threading
 from TMQ.Tool.TMSingleton import SingletonCls
 
@@ -41,7 +42,7 @@ class MysqlTool(ABC):
             cursor.execute(sql_create_db_cmd)
             cursor.execute(sql_use_db)
         except Exception as msg:
-            print(msg)
+            tm_print(msg)
 
     # 断连
     def disconnect_db(self):
@@ -105,14 +106,16 @@ class OmsMysqlTool(MysqlTool):
             table_name, element)
         try:
             cursor.execute(sql_create_table_cmd)
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
 
     def insert_data(self, ts_code, df):
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name(ts_code)
         if len(df) == 0:
-            print('No Data')
+            tm_print('No Data')
             return;
         df = df.fillna(999999)
         res = zip(*(df[a] for a in self.oms_columns))
@@ -124,8 +127,10 @@ class OmsMysqlTool(MysqlTool):
             cursor.execute(sql)
             # cursor.executeMany(sql)
             self.g_connection.commit()
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
             return False
         # cursor.close()
         return True
@@ -148,14 +153,16 @@ class OmsMysqlTool(MysqlTool):
         order = 'ASC' if is_asc else 'DESC'
         # end = tmd.date_add_days(end, 1)
         select = 'SELECT * FROM {} WHERE trade_time>\'{}\' and trade_time<\'{}\' ORDER BY trade_time {};'.format(table_name, start, end, order)
-        print(select)
+        # tm_print(select)
         df = []
         try:
             cursor.execute(select)
             result = cursor.fetchall()
             df = pd.DataFrame(list(result), columns=self.oms_columns)
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
         return df
 
     # 转换表名
@@ -163,7 +170,7 @@ class OmsMysqlTool(MysqlTool):
         # ts_code改表名
         arr = ts_code.split('.')
         if len(arr) != 2:
-            print('Ts_code Type Error')
+            tm_print('Ts_code Type Error')
             return ''
         table_name = arr[1] + arr[0]
         return table_name
@@ -188,13 +195,15 @@ class OmsMysqlTool(MysqlTool):
         ORDER BY trade_date ASC;'.format(
             table_name, start, end)
         result = []
-        print(select)
+        # print(select)
         try:
             cursor.execute(select)
             # result = pd.DataFrame(list(cursor.fetchall()))
             result = [date[0] for date in cursor.fetchall()]
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
         return result
 
 
@@ -240,14 +249,16 @@ class CheckTradeDateMysqlTool(MysqlTool):
             table_name, element)
         try:
             cursor.execute(sql_create_table_cmd)
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
 
     def insert_data(self, df):
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name()
         if len(df) == 0:
-            print('No Data')
+            tm_print('No Data')
             return;
         # df = df.fillna(None)
         res = zip(*(df[a] for a in self.trade_has_data_columns))
@@ -259,8 +270,10 @@ class CheckTradeDateMysqlTool(MysqlTool):
             cursor.execute(sql)
             # cursor.executeMany(sql)
             self.g_connection.commit()
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
             return False
         # cursor.close()
         return True
@@ -280,14 +293,16 @@ class CheckTradeDateMysqlTool(MysqlTool):
         cursor = self.g_connection.cursor()
         table_name = self.get_table_name()
         select = 'SELECT * FROM {} WHERE cal_date>=\'{}\' and cal_date<=\'{}\';'.format(table_name, start, end)
-        print(select)
+        # tm_print(select)
         df = []
         try:
             cursor.execute(select)
             result = cursor.fetchall()
             df = pd.DataFrame(list(result), columns=self.trade_has_data_columns)
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
         return df
 
     # 获取数据库股票数据
@@ -307,14 +322,16 @@ class CheckTradeDateMysqlTool(MysqlTool):
         condaiton_str = ','.join(date_list)
         select = 'SELECT * FROM {} WHERE cal_date in ({}) and ts_code = \'{}\';'\
             .format(table_name, condaiton_str, ts_code)
-        print(select)
+        # tm_print(select)
         df = []
         try:
             cursor.execute(select)
             result = cursor.fetchall()
             df = pd.DataFrame(list(result), columns=self.trade_has_data_columns)
-        except Exception as msg:
-            print(msg)
+        except pymysql.Warning as msg:
+            tm_print(msg)
+        except pymysql.Error as e:
+            tm_print(e)
         return df
 
     # 转换表名

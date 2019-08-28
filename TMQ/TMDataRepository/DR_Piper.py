@@ -6,13 +6,11 @@ from TMQ.TMDataRepository.DR_MysqlTool import OmsMysqlTool,CheckTradeDateMysqlTo
 from TMQ.Tool.TMSlider import percent
 import TMQ.Tool.TMDate as tmdt
 import TMQ.Tool.TMJson as tmjs
+from TMQ.Tool.TMConfig import tm_print
 from TMQ.Tool.TMObserver import NotificationCenter, Receiver
 from enum import Enum
 
-class taskType(Enum):
-    goto_get_download_list = 1,
-    finish_get_download_list = 2,
-    goto_download = 3,
+
 
 
 
@@ -28,11 +26,11 @@ def main_go():
 
     download_task_list = pip.get_download_task_list(ts_code, need_check_dates, need_download_dates)
 
-    p = Piper()
+    p = PiperDownloader()
     p.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
 
 
-class Piper():
+class PiperDownloader():
     def __init__(self):
         # self.table_name = ''
         # 创建数据库连接工具对象
@@ -83,9 +81,11 @@ class PiperTask():
         # self.omsMysqlTool = None
         # self.checkMysqlTool = None
         lost_day = self.get_lost_data_from_oms_db(start, end, ts_code)
-        a,b,c = self.check_trade_dates(lost_day, ts_code)
-        self.get_download_task_list = self.get_download_task_list(ts_code, b, c)
 
+        a,b,c = self.check_trade_dates(lost_day, ts_code)
+        self.basic_merge_trade_date_df, self.need_check_dates, self.check_box_need_download_dates = a,b,c
+        self.download_task_list = self.get_download_task_list(ts_code, b, c)
+        NotificationCenter().postNotification(PipState.already_get_download_list)
 
 
     # 获取ts_code在oms数据库中，start和end期间缺少的数据
@@ -147,6 +147,8 @@ class PiperTask():
         return download_task_list
 
 
+class PipState(Enum):
+    already_get_download_list = 1,
 
 
 class PipControl(Receiver):
@@ -157,33 +159,34 @@ class PipControl(Receiver):
         # 创建数据库连接工具对象
         # 连接数据库
         NotificationCenter().register(self)
-
+        self.pipTask = None
 
 
     def notify(self, notifiation):
-        print(notifiation)
+        if notifiation == PipState.already_get_download_list:
+            print(notifiation)
 
 
 
     def sendTask(self, start, end, ts_code):
-        pipTask = PiperTask(start, end, ts_code)
-
+        self.pipTask = PiperTask(start, end, ts_code)
+        # tm_print(pipTask)
 
     def clear(self):
         NotificationCenter.unregister(self)
 
 
-def controlCenter():
+# def controlCenter():
 
 
-    start = '20180103'
-    end = '20180403'
-    ts_code = '000001.SZ'
-    NotificationCenter()
-    pip =Piper()
-    NotificationCenter().register(pip)
-    pipTask = PiperTask(start, end, ts_code)
-
-    NotificationCenter().register(pipTask)
-
-    NotificationCenter().postNotification('')
+    # start = '20180103'
+    # end = '20180403'
+    # ts_code = '000001.SZ'
+    # NotificationCenter()
+    # pip =Piper()
+    # NotificationCenter().register(pip)
+    # pipTask = PiperTask(start, end, ts_code)
+    #
+    # NotificationCenter().register(pipTask)
+    #
+    # NotificationCenter().postNotification('')
