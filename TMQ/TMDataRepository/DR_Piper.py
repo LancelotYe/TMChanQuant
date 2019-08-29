@@ -85,6 +85,7 @@ class PiperTask():
         a,b,c = self.check_trade_dates(lost_day, ts_code)
         self.basic_merge_trade_date_df, self.need_check_dates, self.check_box_need_download_dates = a,b,c
         self.download_task_list = self.get_download_task_list(ts_code, b, c)
+        print('show')
         NotificationCenter().postNotification(PipState.already_get_download_list)
 
 
@@ -144,6 +145,7 @@ class PiperTask():
         new_download_list = need_check_dates + check_box_need_download_dates
         download_task_list = tmdt.incise_date_into_block(new_download_list, 25)
         tmjs.saveTasksJsonFile(ts_code, download_task_list)
+
         return download_task_list
 
 
@@ -158,17 +160,20 @@ class PipControl(Receiver):
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
-        NotificationCenter().register(self)
+
         self.pipTask = None
 
 
     def notify(self, notifiation):
+
         if notifiation == PipState.already_get_download_list:
-            print(notifiation)
+            print('xxx' + notifiation)
 
 
 
     def sendTask(self, start, end, ts_code):
+        print(self)
+        NotificationCenter().register(self)
         self.pipTask = PiperTask(start, end, ts_code)
         # tm_print(pipTask)
 

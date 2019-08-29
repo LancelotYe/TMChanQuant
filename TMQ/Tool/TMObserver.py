@@ -37,6 +37,7 @@ class NotificationCenter(Publisher):
         self._listOfUsers.remove(userObj)
 
     def notifyAll(self):
+        print(self._listOfUsers)
         for objects in self._listOfUsers:
             objects.notify(self.notifiation)
 
