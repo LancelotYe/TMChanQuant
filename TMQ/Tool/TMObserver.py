@@ -22,11 +22,11 @@ class NotificationCenter(Publisher):
         self._listOfUsers = []
         self.notifiation = None
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(NotificationCenter, "_instance"):
-            with NotificationCenter._instance_lock:
-                if not hasattr(NotificationCenter, "_instance"):
-                    NotificationCenter._instance = object.__new__(cls)
+    @classmethod
+    def instance(cls, *args, **kwargs):
+        with NotificationCenter._instance_lock:
+            if not hasattr(NotificationCenter, "_instance"):
+                NotificationCenter._instance = NotificationCenter(*args, **kwargs)
         return NotificationCenter._instance
 
     def register(self, userObj):
@@ -37,8 +37,8 @@ class NotificationCenter(Publisher):
         self._listOfUsers.remove(userObj)
 
     def notifyAll(self):
-        print(self._listOfUsers)
         for objects in self._listOfUsers:
+            print('{} get notif'.format(objects))
             objects.notify(self.notifiation)
 
     def postNotification(self, notifiation):
@@ -60,9 +60,9 @@ class Receiver:
 #         pass
 #
 #
-# class User2(Receiver):
-#     def notify(self, notifiation):
-#         print("User2 notified of a new post %s" % notifiation)
+class User2(Receiver):
+    def notify(self, notifiation):
+        print("User2 notified of a new post %s" % notifiation)
 #
 #
 # class SisterSites(Receiver):
@@ -76,20 +76,20 @@ class Receiver:
 
 
 #
-# if __name__ == "__main__":
-#     notificationCenter = NotificationCenter()
-#
-#     user1 = User1()
-#     user2 = User2()
-#     sites = SisterSites()
-#
-#     notificationCenter.register(user1)
-#     notificationCenter.register(user2)
-#     notificationCenter.register(sites)
-#
-#
-#     notificationCenter.writeNewPost("Observe Pattern in Python")
-#
-#     notificationCenter.unregister(sites)
-#
-#     notificationCenter.writeNewPost("MVC Pattern in Python")
+if __name__ == "__main__":
+    notificationCenter = NotificationCenter()
+
+    # user1 = User1()
+    user2 = User2()
+    # sites = SisterSites()
+
+    # notificationCenter.register(user1)
+    notificationCenter.register(user2)
+    # notificationCenter.register(sites)
+
+
+    notificationCenter.writeNewPost("Observe Pattern in Python")
+
+    # notificationCenter.unregister(sites)
+
+    notificationCenter.writeNewPost("MVC Pattern in Python")

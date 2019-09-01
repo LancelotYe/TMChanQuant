@@ -13,21 +13,24 @@ from enum import Enum
 
 
 
+# -----------------------------------------------------------------------------------------------------------------------------
 
+class PipState(Enum):
+    already_get_download_list = 1,
+    download_task_finish = 2,
 
-
-def main_go():
-    start = '20110103'
-    end = '20190103'
-    ts_code = '000001.SZ'
-    pip = PiperTask()
-    lost_days = pip.get_lost_data_from_oms_db(ts_code, start, end)
-    basic_merge_trade_date_df, need_check_dates, need_download_dates= pip.check_trade_dates(lost_days, ts_code)
-
-    download_task_list = pip.get_download_task_list(ts_code, need_check_dates, need_download_dates)
-
-    p = PiperDownloader()
-    p.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
+# def main_go():
+#     start = '20110103'
+#     end = '20190103'
+#     ts_code = '000001.SZ'
+#     pip = PiperTask()
+#     lost_days = pip.get_lost_data_from_oms_db(ts_code, start, end)
+#     basic_merge_trade_date_df, need_check_dates, need_download_dates= pip.check_trade_dates(lost_days, ts_code)
+#
+#     download_task_list = pip.get_download_task_list(ts_code, need_check_dates, need_download_dates)
+#
+#     p = PiperDownloader()
+#     p.start_download(ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
 
 
 class PiperDownloader():
@@ -35,13 +38,7 @@ class PiperDownloader():
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
-        self.omsMysqlTool = None
-        self.checkMysqlTool = None
-        # self.loop_num = 0
-        # self.total_loop_num = 5
-        # self.loop_date_list = []
-        # self.need_exist_df = pd.DataFrame()
-
+        pass
 
     def start_download(self, ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates):
         need_donwload_count = len(download_task_list)
@@ -53,10 +50,10 @@ class PiperDownloader():
             start = task[0]
             end = task[1]
             # step1
-            df = TsTool().ts_get_oms_price(ts_code, start, end)
+            df = TsTool.instance().ts_get_oms_price(ts_code, start, end)
             # 筛选需要保存的数据
             need_save_df = df[df.trade_date.isin(need_check_dates+need_download_dates)]
-            self.omsMysqlTool.insert_data(ts_code, need_save_df)
+            OmsMysqlTool.instance().insert_data(ts_code, need_save_df)
             # step2
             # 保存到checkDB的数据
             # all_dates = tmdt.get_everyday(start, end)
@@ -66,12 +63,14 @@ class PiperDownloader():
             # basic_merge_trade_date_df.cal_date.isin(wait_for_check_days)
             basic_merge_trade_date_df.loc[basic_merge_trade_date_df.cal_date.isin(wait_for_check_days), 'has_data'] = 1
             # 保存到数据check数据库
-            self.checkMysqlTool.insert_data(basic_merge_trade_date_df)
+            CheckTradeDateMysqlTool.instance().insert_data(basic_merge_trade_date_df)
             # step3
             # json文件修改
             tmjs.finishTaskTellJsonFile(ts_code, task)
+        NotificationCenter.instance().postNotification(PipState.download_task_finish)
 
 
+# -----------------------------------------------------------------------------------------------------------------------------
 
 class PiperTask():
     def __init__(self, start, end, ts_code):
@@ -80,13 +79,15 @@ class PiperTask():
         # 连接数据库
         # self.omsMysqlTool = None
         # self.checkMysqlTool = None
-        lost_day = self.get_lost_data_from_oms_db(start, end, ts_code)
-
-        a,b,c = self.check_trade_dates(lost_day, ts_code)
+        self.start = start
+        self.end = end
+        self.ts_code = ts_code
+        self.lost_day = self.get_lost_data_from_oms_db(start, end, ts_code)
+        a,b,c = self.check_trade_dates(self.lost_day, ts_code)
         self.basic_merge_trade_date_df, self.need_check_dates, self.check_box_need_download_dates = a,b,c
         self.download_task_list = self.get_download_task_list(ts_code, b, c)
-        print('show')
-        NotificationCenter().postNotification(PipState.already_get_download_list)
+        # 发送通知去下载
+        NotificationCenter.instance().postNotification(PipState.already_get_download_list)
 
 
     # 获取ts_code在oms数据库中，start和end期间缺少的数据
@@ -98,11 +99,11 @@ class PiperTask():
         :param ts_code: str
         :return: list
         '''
-        OmsMysqlTool().create_table(ts_code)
-        has_data_day = OmsMysqlTool().get_exist_trade_date_index(ts_code, start, end)
+        OmsMysqlTool.instance().create_table(ts_code)
+        has_data_day = OmsMysqlTool.instance().get_exist_trade_date_index(ts_code, start, end)
         everyday = tmdt.get_everyday(start, end)
         lost_day = list(set(everyday) - set(has_data_day))
-        OmsMysqlTool().disconnect_db()
+        OmsMysqlTool.instance().disconnect_db()
         lost_day.sort()
         return lost_day
 
@@ -113,13 +114,13 @@ class PiperTask():
         # 获取最长时间段
         start, end = tmdt.get_early_and_late_date(check_dates)
         # 缺少的最长时间段交易日期数据
-        ts_trade_df = TsTool().ts_get_trade_date(start, end)
+        ts_trade_df = TsTool.instance().ts_get_trade_date(start, end)
         # # 保存交易日期数据，等验证完数据以后，需要保存到数据库
         # self.ts_trade_df = ts_trade_df
         # 获取check_data数据库
         # checkMysqlTool = CheckTradeDateMysqlTool()
-        check_db_df = CheckTradeDateMysqlTool().get_data_from_db_by_date_list(ts_code, lost_day)
-        CheckTradeDateMysqlTool().disconnect_db()
+        check_db_df = CheckTradeDateMysqlTool.instance().get_data_from_db_by_date_list(ts_code, lost_day)
+        CheckTradeDateMysqlTool.instance().disconnect_db()
 
         ts_trade_df_dates = list(ts_trade_df.cal_date)
         check_db_df_dates = list(check_db_df.cal_date)
@@ -145,14 +146,12 @@ class PiperTask():
         new_download_list = need_check_dates + check_box_need_download_dates
         download_task_list = tmdt.incise_date_into_block(new_download_list, 25)
         tmjs.saveTasksJsonFile(ts_code, download_task_list)
-
         return download_task_list
 
 
-class PipState(Enum):
-    already_get_download_list = 1,
 
 
+# -----------------------------------------------------------------------------------------------------------------------------
 class PipControl(Receiver):
 
     def __init__(self):
@@ -160,25 +159,39 @@ class PipControl(Receiver):
         # self.table_name = ''
         # 创建数据库连接工具对象
         # 连接数据库
-
+        self.start = None
+        self.end = None
+        self.ts_code = None
         self.pipTask = None
-
+        self.piperDownloader = PiperDownloader()
+        NotificationCenter.instance().register(self)
 
     def notify(self, notifiation):
 
         if notifiation == PipState.already_get_download_list:
-            print('xxx' + notifiation)
+            print('收到了通知')
+            # (self, ts_code, download_task_list, need_check_dates, basic_merge_trade_date_df, need_download_dates)
+            # self.basic_merge_trade_date_df, self.need_check_dates, self.check_box_need_download_dates
+            self.piperDownloader.start_download(
+                self.pipTask.ts_code,
+                self.pipTask.download_task_list,
+                self.pipTask.need_check_dates,
+                self.pipTask.basic_merge_trade_date_df ,
+                self.pipTask.check_box_need_download_dates
+            )
+        elif notifiation == PipState.download_task_finish:
+            pass
 
 
 
     def sendTask(self, start, end, ts_code):
-        print(self)
-        NotificationCenter().register(self)
+        # print(self)
+
         self.pipTask = PiperTask(start, end, ts_code)
         # tm_print(pipTask)
 
     def clear(self):
-        NotificationCenter.unregister(self)
+        NotificationCenter.instance().unregister(self)
 
 
 # def controlCenter():

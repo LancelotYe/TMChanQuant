@@ -5,15 +5,18 @@ ts_code = '000001.SZ'
 start = '20180103'
 end = '20180304'
 
-
 control = PipControl()
 control.sendTask(start, end, ts_code)
 
-# control.pipTask.download_task_list
 
 
-a = NotificationCenter()
-b = NotificationCenter()
+
+
+
+
+
+b = NotificationCenter.instance()
+a = NotificationCenter.instance()
 print(a,b)
 
 

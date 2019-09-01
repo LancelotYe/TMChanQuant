@@ -76,11 +76,11 @@ class OmsMysqlTool(MysqlTool):
 
     _instance_lock = threading.Lock()
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(OmsMysqlTool, "_instance"):
-            with OmsMysqlTool._instance_lock:
-                if not hasattr(OmsMysqlTool, "_instance"):
-                    OmsMysqlTool._instance = object.__new__(cls)
+    @classmethod
+    def instance(cls):
+        with OmsMysqlTool._instance_lock:
+            if not hasattr(OmsMysqlTool, "_instance"):
+                OmsMysqlTool._instance = OmsMysqlTool()
         return OmsMysqlTool._instance
 
     # 以下方法针对一分钟的股票数据，标记为OneMinuteStock简化为oms
@@ -224,11 +224,11 @@ class CheckTradeDateMysqlTool(MysqlTool):
 
     _instance_lock = threading.Lock()
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(CheckTradeDateMysqlTool, "_instance"):
-            with CheckTradeDateMysqlTool._instance_lock:
-                if not hasattr(CheckTradeDateMysqlTool, "_instance"):
-                    CheckTradeDateMysqlTool._instance = object.__new__(cls)
+    @classmethod
+    def instance(cls):
+        with CheckTradeDateMysqlTool._instance_lock:
+            if not hasattr(CheckTradeDateMysqlTool, "_instance"):
+                CheckTradeDateMysqlTool._instance = CheckTradeDateMysqlTool()
         return CheckTradeDateMysqlTool._instance
 
     def create_table(self):

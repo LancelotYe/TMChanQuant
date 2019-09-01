@@ -15,11 +15,11 @@ class TsTool():
         self.target_refresh_time = datetime.datetime.today()
         self.token_index = None
 
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(TsTool, "_instance"):
-            with TsTool._instance_lock:
-                if not hasattr(TsTool, "_instance"):
-                    TsTool._instance = object.__new__(cls)
+    @classmethod
+    def instance(cls, *args, **kwargs):
+        with TsTool._instance_lock:
+            if not hasattr(TsTool, "_instance"):
+                TsTool._instance = TsTool()
         return TsTool._instance
 
     def check_token(self):
