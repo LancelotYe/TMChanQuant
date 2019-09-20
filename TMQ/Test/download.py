@@ -1,6 +1,7 @@
 import tushare as ts
 import pandas as pd
 import sys
+import os
 
 
 def download(ts_code, start_date, end_date):
@@ -15,7 +16,12 @@ def download(ts_code, start_date, end_date):
     tdf['Close'] = df.close
     tdf['Adj_Close'] = df.close
     tdf['Volume'] = df.vol
-    tdf.to_csv('{}.csv'.format(ts_code))
+
+    dir_path = os.path.os.path.join(os.getcwd(), end_date)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    tdf.to_csv(os.path.os.path.join(dir_path, '{}.csv'.format(ts_code)))
     return tdf
 
 
