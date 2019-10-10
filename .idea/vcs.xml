@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/python学习资料/VNProject/vnpyDD/vnpy" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/python学习资料/abu" vcs="Git" />
   </component>
 </project>

@@ -25,6 +25,9 @@ def download(ts_code, start_date, end_date):
     return tdf
 
 
+df.ts_code
+
+
 if __name__ == '__main__':
     # download('000001.SZ', '20150102','20180102')
     download(sys.argv[1], sys.argv[2], sys.argv[3])
