@@ -261,3 +261,222 @@ callable([1, 2, 3])
 callable(None)
 callable('str')
 
+
+'''
+使用枚举类
+'''
+# 当我们需要定义常量时，一个办法是用大写变量通过整数来定义，例如月份：
+# 好处是简单，缺点是类型是int，并且仍然是变量。
+#
+# 更好的方法是为这样的枚举类型定义一个class类型，然后，每个常量都是class的一个唯一实例。Python提供了Enum类来实现这个功能：
+
+from enum import Enum
+Month = Enum('Month', ('Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'))
+# 这样我们就获得了Month类型的枚举类，可以直接使用Month.Jan来引用一个常量，或者枚举它的所有成员：
+for name, member in Month.__members__.items():
+    print(name, '=>', member, ',', member.value)
+
+# value属性则是自动赋给成员的int常量，默认从1开始计数。
+#
+# 如果需要更精确地控制枚举类型，可以从Enum派生出自定义类：
+from enum import Enum, unique
+
+@unique
+class Weekday(Enum):
+    Sun = 0 # Sun的value被设定为0
+    Mon = 1
+    Tue = 2
+    Wed = 3
+    Thu = 4
+    Fri = 5
+    Sat = 6
+
+for name, member in Weekday.__members__.items():
+    print(name, '=>', member, ',', member.value)
+
+# @unique装饰器可以帮助我们检查保证没有重复值。
+day1 = Weekday.Mon
+print(day1)
+print(Weekday.Tue)
+print(Weekday['Tue'])
+print(Weekday.Tue.value)
+print(day1 == Weekday.Mon)
+print(Weekday(1))
+
+
+'''
+使用元类
+'''
+type()
+'''
+动态语言和静态语言最大的不同，就是函数和类的定义，不是编译时定义的，而是运行时动态创建的。
+比方说我们要定义一个Hello的class，就写一个hello.py模块：
+'''
+class Hello(object):
+    def hello(self, name='world'):
+        print('Hello, %s.' % name)
+
+h = Hello()
+h.hello()
+print(type(Hello))
+print(type(h))
+'''
+type()函数可以查看一个类型或变量的类型，Hello是一个class，它的类型就是type，而h是一个实例，它的类型就是class Hello。
+
+我们说class的定义是运行时动态创建的，而创建class的方法就是使用type()函数。
+
+type()函数既可以返回一个对象的类型，又可以创建出新的类型，比如，我们可以通过type()函数创建出Hello类，而无需通过class Hello(object)...的定义：
+'''
+# class Hello(object):
+#     def hello(self, name='world'):
+#         print('Hello, %s.' % name)
+
+def fn(self, name='world'):  # 先定义函数
+    print('Hello, %s.' % name)
+
+Hello = type('Hello', (object,), dict(hello=fn)) # 创建Hello class
+h = Hello()
+h.hello()
+print(type(Hello))
+print(type(h))
+
+'''
+metaclass
+'''
+# 除了使用type()动态创建类以外，要控制类的创建行为，还可以使用metaclass。
+# 当我们定义了类以后，就可以根据这个类创建出实例，所以：先定义类，然后创建实例。
+#
+# 但是如果我们想创建出类呢？那就必须根据metaclass创建出类，所以：先定义metaclass，然后创建类。
+#
+# 连接起来就是：先定义metaclass，就可以创建类，最后创建实例。
+#
+# 所以，metaclass允许你创建类或者修改类。换句话说，你可以把类看成是metaclass创建出来的“实例”。
+#
+# metaclass是Python面向对象里最难理解，也是最难使用的魔术代码。正常情况下，你不会碰到需要使用metaclass的情况，所以，以下内容看不懂也没关系，因为基本上你不会用到。
+#
+# 我们先看一个简单的例子，这个metaclass可以给我们自定义的MyList增加一个add方法：
+# 定义ListMetaclass，按照默认习惯，metaclass的类名总是以Metaclass结尾，以便清楚地表示这是一个metaclass：
+# metaclass是类的模板，所以必须从`type`类型派生：
+class ListMetaclass(type):
+    def __new__(cls, name, bases, attrs):
+        attrs['add'] = lambda self, value: self.append(value)
+        return type.__new__(cls, name, bases, attrs)
+# 有了ListMetaclass，我们在定义类的时候还要指示使用ListMetaclass来定制类，传入关键字参数metaclass：
+class MyList(list, metaclass=ListMetaclass):
+    pass
+# 当我们传入关键字参数metaclass时，魔术就生效了，它指示Python解释器在创建MyList时，要通过ListMetaclass.__new__()来创建，在此，我们可以修改类的定义，比如，加上新的方法，然后，返回修改后的定义。
+#
+# __new__()方法接收到的参数依次是：
+# 当前准备创建的类的对象；
+#
+# 类的名字；
+#
+# 类继承的父类集合；
+#
+# 类的方法集合。
+#
+# 测试一下MyList是否可以调用add()方法
+L = MyList()
+L.add(1)
+L
+'''
+动态修改有什么意义？直接在MyList定义中写上add()方法不是更简单吗？正常情况下，确实应该直接写，通过metaclass修改纯属变态。
+
+但是，总会遇到需要通过metaclass修改类定义的。ORM就是一个典型的例子。
+
+ORM全称“Object Relational Mapping”，即对象-关系映射，就是把关系数据库的一行映射为一个对象，也就是一个类对应一个表，这样，写代码更简单，不用直接操作SQL语句。
+
+要编写一个ORM框架，所有的类都只能动态定义，因为只有使用者才能根据表的结构定义出对应的类来。
+
+让我们来尝试编写一个ORM框架。
+
+编写底层模块的第一步，就是先把调用接口写出来。比如，使用者如果使用这个ORM框架，想定义一个User类来操作对应的数据库表User，我们期待他写出这样的代码：
+'''
+# class User(Model):
+#     # 定义类的属性到列的映射：
+#     id = IntegerField('id')
+#     name = StringField('username')
+#     email = StringField('email')
+#     password = StringField('password')
+#
+# # 创建一个实例：
+# u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
+# 保存到数据库：
+# u.save()
+# 其中，父类Model和属性类型StringField、IntegerField是由ORM框架提供的，剩下的魔术方法比如save()全部由metaclass自动完成。虽然metaclass的编写会比较复杂，但ORM的使用者用起来却异常简单。
+#
+# 现在，我们就按上面的接口来实现该ORM。
+#
+# 首先来定义Field类，它负责保存数据库表的字段名和字段类型：
+class Field(object):
+
+    def __init__(self, name, column_type):
+        self.name = name
+        self.column_type = column_type
+
+    def __str__(self):
+        return '<%s:%s>' % (self.__class__.__name__, self.name)
+# 在Field的基础上，进一步定义各种类型的Field，比如StringField，IntegerField等等：
+
+class StringField(Field):
+    def __init__(self, name):
+        super(StringField, self).__init__(name, 'varchar(100)')
+
+class IntegerField(Field):
+    def __init__(self, name):
+        super(IntegerField, self).__init__(name, 'bigint')
+# 下一步，就是编写最复杂的ModelMetaclass了：
+
+class ModelMetaclass(type):
+
+    def __new__(cls, name, bases, attrs):
+        if name=='Model':
+            return type.__new__(cls, name, bases, attrs)
+        print('Found model: %s' % name)
+        mappings = dict()
+        for k, v in attrs.items():
+            if isinstance(v, Field):
+                print('Found mapping: %s ==> %s' % (k, v))
+                mappings[k] = v
+        for k in mappings.keys():
+            attrs.pop(k)
+        attrs['__mappings__'] = mappings # 保存属性和列的映射关系
+        attrs['__table__'] = name # 假设表名和类名一致
+        return type.__new__(cls, name, bases, attrs)
+
+class Model(dict, metaclass=ModelMetaclass):
+
+    def __init__(self, **kw):
+        super(Model, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r"'Model' object has no attribute '%s'" % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+    def save(self):
+        fields = []
+        params = []
+        args = []
+        for k, v in self.__mappings__.items():
+            fields.append(v.name)
+            params.append('?')
+            args.append(getattr(self, k, None))
+        sql = 'insert into %s (%s) values (%s)' % (self.__table__, ','.join(fields), ','.join(params))
+        print('SQL: %s' % sql)
+        print('ARGS: %s' % str(args))
+
+
+class User(Model):
+    # 定义类的属性到列的映射：
+    id = IntegerField('id')
+    name = StringField('username')
+    email = StringField('email')
+    password = StringField('password')
+
+# 创建一个实例：
+u = User(id=12345, name='Michael', email='test@orm.org', password='my-pwd')
