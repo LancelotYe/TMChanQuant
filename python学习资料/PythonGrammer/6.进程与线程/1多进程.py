@@ -104,3 +104,62 @@ import subprocess
 print('$ nslookup www.python.org')
 r = subprocess.call(['nslookup', 'www.python.org'])
 print('Exit code:', r)
+
+# 如果子进程还需要输入，则可以通过communicate()方法输入：
+import subprocess
+
+print('$ nslookup')
+p = subprocess.Popen(['nslookup'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+output, err = p.communicate(b'set q=mx\npython.org\nexit\n')
+print(output.decode('utf-8'))
+print('Exit code:', p.returncode)
+
+# 上面的代码相当于在命令行执行命令nslookup，然后手动输入：
+'''
+set q=mx
+python.org
+exit
+'''
+
+
+'''
+进程间通信
+'''
+'''
+Process之间肯定是需要通信的，操作系统提供了很多机制来实现进程间的通信。Python的multiprocessing模块包装了底层的机制，提供了Queue、Pipes等多种方式来交换数据。
+
+我们以Queue为例，在父进程中创建两个子进程，一个往Queue里写数据，一个从Queue里读数据：
+'''
+from multiprocessing import Process, Queue
+import os, time, random
+
+#写数据进程执行代码
+def write(q):
+    print('Process to write:%s' % os.getpid())
+    for value in ['A','B','C']:
+        print('Put %s to queue.' % value)
+        q.put(value)
+        time.sleep(random.random())
+
+#读数据进程执行代码
+def read(q):
+    print('Process to read: %s' % os.getpid())
+    while True:
+        value = q.get(True)
+        print('Get %s from queue' % value)
+
+def main():
+    q = Queue()
+    pw = Process(target=write, args=(q,))
+    pr = Process(target=read, args=(q,))
+    #启动子进程pw写入
+    pw.start()
+    pr.start()
+    pw.join()
+    pr.terminate()
+
+'''
+在Unix/Linux下，multiprocessing模块封装了fork()调用，使我们不需要关注fork()的细节。由于Windows没有fork调用，因此，multiprocessing需要“模拟”出fork的效果，父进程所有Python对象都必须通过pickle序列化再传到子进程去，所以，如果multiprocessing在Windows下调用失败了，要先考虑是不是pickle失败了。
+'''
+
+
